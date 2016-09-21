@@ -13,11 +13,13 @@
 if [[ `uname` == 'Linux' ]]; then
     alias ls="ls --color=auto"
     PLATFORM="linux"
+    export PATH=$HOME/anaconda3/bin:$PATH
 fi
 
 if [[ `uname` == 'Darwin' ]]; then
     alias ls="ls -G"
     PLATFORM="osx"
+    export PATH=$HOME/anaconda/bin:$PATH
 fi
 
 ###################
@@ -27,7 +29,6 @@ fi
 # VARIABLES
 
 # Python path
-export PATH=$HOME/anaconda3/bin:$PATH
 export VISUAL="vim"
 export EDITOR="vim"
 export BROWSER="google-chrome"
