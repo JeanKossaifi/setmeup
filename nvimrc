@@ -24,9 +24,6 @@ call plug#begin('~/.config/nvim/plugged')
     " Air-line
     Plug 'vim-airline/vim-airline'
     
-    " Auto doc-strings (on def, :Pydocstring or <C-l>)
-    Plug 'heavenshell/vim-pydocstring'
-
     " Better indentation for Python
     Plug 'vim-scripts/indentpython.vim'
     
@@ -170,25 +167,6 @@ function! MapF12()
     let s:HitF12 = 0
   endif
 endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
-""""       Specific keymaps for plugins          """"
-"""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Syntastic
-" let g:syntastic_python_python_exe = 'python3'
-" let g:syntastic_python_checkers = ['pylint']
-
-" Pydoc: I want numpy style docstring:
-" Add this to .config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
-"  """
-"  
-"  {{_indent_}}Parameters
-"  {{_indent_}}----------
-"  
-"  {{_arg_}} : {{_lf_}}
-"  {{_indent_}}Returns
-"  {{_indent_}}-------
-"  """
 
 " Run pyFlakes on save
 " autocmd BufWritePost *.py call Flake8()

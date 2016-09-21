@@ -10,7 +10,15 @@
 #
 ###################
 
+if [[ `uname` == 'Linux' ]]; then
+    alias ls="ls --color=auto"
+    PLATFORM="linux"
+fi
 
+if [[ `uname` == 'Darwin' ]]; then
+    alias ls="ls -G"
+    PLATFORM="osx"
+fi
 
 ###################
 # CUSTOM COMMANDS #
@@ -29,8 +37,6 @@ export PAGER=less
 
 # Pycharm
 alias pycharm='$HOME/pycharm_2016-2/bin/pycharm.sh &'
-# Colored ls
-alias ls="ls --color=auto"
 
 #####################
 #  History config   #
@@ -52,12 +58,16 @@ SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
 # Only show commands matching current line up to the cursor position
-autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
+# autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+# zle -N up-line-or-beginning-search
+# zle -N down-line-or-beginning-search
+# 
+# [[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"   up-line-or-beginning-search
+# [[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-beginning-search
 
-[[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"   up-line-or-beginning-search
-[[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-beginning-search
+# make search up and down work, so partially type and hit up/down to find relevant stuff
+bindkey '^[[A' up-line-or-search                                                
+bindkey '^[[B' down-line-or-search
 
 
 #####################
@@ -101,6 +111,7 @@ man() {
     LESS_TERMCAP_us=$(printf "\e[1;32m") \
     man "$@"
 }
+
 #####################
 # Set up completion #
 #####################
@@ -160,10 +171,6 @@ esac
 # Set up the prompt #
 #####################
 
-# autoload -Uz promptinit
-# promptinit
-# prompt adam1
-
 # Use colors for the prompt
 autoload -Uz colors && colors
 
@@ -183,13 +190,13 @@ local _linedown=$'\e[1B'
 
 # Indicate whether it is a local/ssh terminal or tmux session
 if over_ssh && [ -n "${TMUX}" ]; then 
-    local _host_str='%B%K{blue}%F{yellow}%n@%m:%S '
+    local _host_str='%B%K{blue}%F{yellow}%n@%m:%S'
 elif over_ssh; then
-    local _host_str='%B%K{blue}%F{white}%n@%m:%S '
+    local _host_str='%B%K{blue}%F{white}%n@%m:%S'
 elif [ -n "${TMUX}" ]; then
-    local _host_str='%B%K{green}%F{yellow}%n@%m:%S '
+    local _host_str='%B%K{green}%F{yellow}%n@%m:%S'
 else
-    local _host_str='%B%K{green}%F{white}%n@%m:%S '
+    local _host_str='%B%K{green}%F{white}%n@%m:%S'
 fi
 
 # Indicate whether local/ssh/tmux then user-name (%n) then short host (machine = %m) then 
