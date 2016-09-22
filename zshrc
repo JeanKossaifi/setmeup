@@ -32,7 +32,7 @@ fi
 export VISUAL="vim"
 export EDITOR="vim"
 export BROWSER="google-chrome"
-export PAGER=less
+export PAGER="less"
 
 # ALIASES
 
@@ -52,11 +52,6 @@ HISTFILE=~/.zsh_history
 
 # Shared history, no duplicates
 setopt histignorealldups sharehistory
-
-# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
-HISTSIZE=1000
-SAVEHIST=1000
-HISTFILE=~/.zsh_history
 
 # Only show commands matching current line up to the cursor position
 # autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -202,7 +197,16 @@ fi
 
 # Indicate whether local/ssh/tmux then user-name (%n) then short host (machine = %m) then 
 # Then add current directory (%~)
-PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
+
+#_current_path='%(5~|%-1~/…/%3~|%4~)'
+# This checks, whether the path is longer then 5 elements, and in that case prints the first element (%-1~), some dots (/…/) and the last 3 elements. It is not exactly the same as paths, that are not in your home directory, will also have the first element at the beginning, while bash just prints dots in that case. So
+
+# Shorten the path if it is longer than 60 percent of the prompt
+_current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
+
+
+#PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
+PROMPT="${_host_str} ${_current_path} ❯❯❯%s%k%b%f "
 PROMPT="${PROMPT}${_newline}%B> %b"
 
 # In the right we just want the time/date

@@ -94,8 +94,8 @@ set incsearch
 syntax on
 
 " Couleurs adaptees a un fond sombre
-set background=dark
-" set background=light
+" set background=dark
+set background=light
 
 " Display current command
 " set showcmd
