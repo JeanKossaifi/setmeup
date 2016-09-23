@@ -125,6 +125,9 @@ zstyle ':completion:*' rehash true
 # Activate navigation in the completion menu
 zstyle ':completion:*' menu select
 
+# Use shifttab to go backward in the completion menu
+bindkey '^[[Z' reverse-menu-complete
+
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 zstyle ':completion:*:*:kill:*' menu yes select
