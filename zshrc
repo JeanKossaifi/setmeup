@@ -144,6 +144,10 @@ zstyle ':completion:*' rehash true
 # Activate navigation in the completion menu
 zstyle ':completion:*' menu select
 
+# Control+enter to complete from completion menu and execute resulting line
+zmodload zsh/complist
+bindkey -M menuselect '^J' .accept-line
+
 # Use shifttab to go backward in the completion menu
 bindkey '^[[Z' reverse-menu-complete
 
