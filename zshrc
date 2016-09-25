@@ -69,8 +69,16 @@ setopt histignorealldups sharehistory
 
 # Only show commands matching current line up to the cursor position when
 # pressing up/down
-[[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"  up-line-or-search
-[[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-search
+# [[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"  up-line-or-search
+# [[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-search
+
+# A better way?
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "$terminfo[kcuu1]" up-line-or-beginning-search
+bindkey "$terminfo[kcud1]" down-line-or-beginning-search
 
 # make search up and down work, so partially type and hit up/down to find relevant stuff
 # bindkey '^[OA' up-line-or-search                                                
