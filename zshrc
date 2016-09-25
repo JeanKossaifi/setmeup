@@ -8,12 +8,26 @@
 # look at the archlinux wiki page
 # https://github.com/MrElendig/dotfiles-alice/blob/master/.zshrc
 #
+#
+# Notes
+# -----
+# 1) Useful utf characters: λ ✔ ✓ ✘ ✢ ➤ ✖ ❯ ❮ ✚ ✹ ➜ ═ ✭ 
+#
+# 2) To get the key-code of any key (say KEY), in the shell:
+#    Ctrl+v KEY
+#
+#    e.g. using ipython style prompt:
+#    In  [1]: ctrl+v [up]
+#    Out [1]: ^[OA
 ###################
 
 if [[ `uname` == 'Linux' ]]; then
     alias ls="ls --color=auto"
     PLATFORM="linux"
     export PATH=$HOME/anaconda3/bin:$PATH
+
+    # Remap CAPS LOCK to Escape
+    setxkbmap -option caps:escape
 fi
 
 if [[ `uname` == 'Darwin' ]]; then
@@ -53,17 +67,14 @@ HISTFILE=~/.zsh_history
 # Shared history, no duplicates
 setopt histignorealldups sharehistory
 
-# Only show commands matching current line up to the cursor position
-# autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
-# zle -N up-line-or-beginning-search
-# zle -N down-line-or-beginning-search
-# 
-# [[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"   up-line-or-beginning-search
-# [[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-beginning-search
+# Only show commands matching current line up to the cursor position when
+# pressing up/down
+[[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"  up-line-or-search
+[[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-search
 
 # make search up and down work, so partially type and hit up/down to find relevant stuff
-bindkey '^[[A' up-line-or-search                                                
-bindkey '^[[B' down-line-or-search
+# bindkey '^[OA' up-line-or-search                                                
+# bindkey '^[OB' down-line-or-search
 
 
 #####################
@@ -215,4 +226,3 @@ PROMPT="${PROMPT}${_newline}%B> %b"
 # In the right we just want the time/date
 RPROMPT="%{${_lineup}%}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
 
-# Useful/Cool utf characters: λ ✔ ✓ ✘ ✢ ➤ ✖ ❯ ❮ ✚ ✹ ➜ ═ ✭ 
