@@ -33,6 +33,10 @@ call plug#begin('~/.config/nvim/plugged')
     " Git plugin: Gstatus, Gedit, Gdiff
     Plug 'tpope/vim-fugitive'
 
+    " Add the 's' (surrounding) option
+    " see :help surround
+    Plug 'tpope/vim-surround'
+
 " Add plugins to &runtimepath
 call plug#end()
 
@@ -52,6 +56,7 @@ set encoding=utf-8
 """ Map leader and escape
 let mapleader=","
 inoremap hh <ESC>
+inoremap kj <ESC>
 
 " Python
 set tabstop=4     " a hard TAB displays as 4 columns
@@ -124,7 +129,7 @@ augroup END
 nnoremap <silent> <Space> : silent noh <Bar> echo <CR>
 
 " Launch the code in ipython
-nnoremap <silent><F5> :!ipython -i %" <CR>
+nnoremap <silent><F5> :!ipython -i % <CR>
 " nnoremap <silent><C-F5> :!ipython -i % <CR>
 
 " Press F2 to display columns
