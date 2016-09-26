@@ -27,7 +27,11 @@ if [[ `uname` == 'Linux' ]]; then
     export PATH=$HOME/anaconda3/bin:$PATH
 
     # Remap CAPS LOCK to Escape
-    setxkbmap -option caps:escape
+    # setxkbmap -option caps:escape
+    # Remap CAPS LOCK to CTRL
+    setxkbmap -option ctrl:nocaps
+    # To reset: 
+    # setxkbmap -option
 fi
 
 if [[ `uname` == 'Darwin' ]]; then
