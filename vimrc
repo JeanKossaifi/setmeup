@@ -46,6 +46,10 @@ call plug#begin('~/.vim/plugged')
 
     Plug 'nvie/vim-flake8'
 
+    " Add the 's' (surrounding) option
+    " see :help surround
+    Plug 'tpope/vim-surround'
+
 call plug#end()
 
 let g:pymode_python = 'python3'
