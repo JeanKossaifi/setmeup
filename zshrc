@@ -21,23 +21,29 @@
 #    Out [1]: ^[OA
 ###################
 
-if [[ `uname` == 'Linux' ]]; then
-    alias ls="ls --color=auto"
-    PLATFORM="linux"
-    export PATH=$HOME/anaconda3/bin:$PATH
+if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
+then
+    # this config has already been executed at least once
+else
+    export ZSH_EXECUTED_ONCE=1
+    if [[ `uname` == 'Linux' ]]; then
+        alias ls="ls --color=auto"
+        export PLATFORM="linux"
+        export PATH=$HOME/anaconda3/bin:$PATH
 
-    # Remap CAPS LOCK to Escape
-    # setxkbmap -option caps:escape
-    # Remap CAPS LOCK to CTRL
-    setxkbmap -option ctrl:nocaps
-    # To reset: 
-    # setxkbmap -option
-fi
+        # Remap CAPS LOCK to Escape
+        # setxkbmap -option caps:escape
+        # Remap CAPS LOCK to CTRL
+        setxkbmap -option ctrl:nocaps
+        # To reset: 
+        # setxkbmap -option
+    fi
 
-if [[ `uname` == 'Darwin' ]]; then
-    alias ls="ls -G"
-    PLATFORM="osx"
-    export PATH=$HOME/anaconda/bin:$PATH
+    if [[ `uname` == 'Darwin' ]]; then
+        alias ls="ls -G"
+        export PLATFORM="osx"
+        export PATH=$HOME/anaconda/bin:$PATH
+    fi
 fi
 
 ###################
