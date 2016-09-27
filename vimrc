@@ -59,6 +59,9 @@ let g:pymode_python = 'python3'
 """"      Start of the real VIMRC                """"
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" TODO: check this: macos only?
+set clipboard=unnamed
+
 set encoding=utf-8
 
 """ Map leader and escape
@@ -100,7 +103,15 @@ syntax on
 
 " Couleurs adaptees a un fond sombre
 " set background=dark
-set background=light
+" set background=light
+if has('gui_running')
+    set background=dark
+    " colorscheme solarized
+else
+    set background=light 
+    " colorscheme solarized
+endif
+
 
 " Display current command
 " set showcmd
@@ -211,6 +222,9 @@ nnoremap <F3> :GundoToggle<CR>
 
 " Nerd-tree
 map <C-n> :NERDTreeToggle<CR>
+" Ignore .pyc etc 
+let NERDTreeIgnore=['\.pyc$', '\~$']
+
 
 " Air-line
 set laststatus=2
