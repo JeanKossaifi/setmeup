@@ -30,11 +30,16 @@ else
         alias ls="ls --color=auto"
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
+        # Key maps
+        _local KEY_UP="$terminfo[kcuu1]"
+        _local KEY_DOWN="$terminfo[kcud1]"
 
         # Remap CAPS LOCK to Escape
         # setxkbmap -option caps:escape
+
         # Remap CAPS LOCK to CTRL
         setxkbmap -option ctrl:nocaps
+
         # To reset: 
         # setxkbmap -option
     fi
@@ -43,8 +48,15 @@ else
         alias ls="ls -G"
         export PLATFORM="osx"
         export PATH=$HOME/anaconda/bin:$PATH
+        # Key maps
+        local _KEY_UP="^[[A"
+        local _KEY_DOWN="^[[B"
     fi
 fi
+
+local _KEY_CTRL_ENTER="^J"
+# Use shifttab to go backward in the completion menu
+local _KEY_SHIFT_TAB="^[[Z"
 
 ###################
 # CUSTOM COMMANDS #
@@ -77,18 +89,15 @@ HISTFILE=~/.zsh_history
 # Shared history, no duplicates
 setopt histignorealldups sharehistory
 
-# Only show commands matching current line up to the cursor position when
-# pressing up/down
-# [[ -n "${key[Up]}"   ]] && bindkey "${key[Up]}"  up-line-or-search
-# [[ -n "${key[Down]}" ]] && bindkey "${key[Down]}" down-line-or-search
-
 # A better way?
 autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-bindkey "$terminfo[kcuu1]" up-line-or-beginning-search
-bindkey "$terminfo[kcud1]" down-line-or-beginning-search
+bindkey "${_KEY_UP}" up-line-or-beginning-search
+bindkey "${_KEY_DOWN}" down-line-or-beginning-search
+# bindkey "^[[A" history-beginning-search-backward
+# bindkey "^[[B" history-beginning-search-forward
 
 # make search up and down work, so partially type and hit up/down to find relevant stuff
 # bindkey '^[OA' up-line-or-search                                                
@@ -156,10 +165,10 @@ zstyle ':completion:*' menu select
 
 # Control+enter to complete from completion menu and execute resulting line
 zmodload zsh/complist
-bindkey -M menuselect '^J' .accept-line
+bindkey -M menuselect "${_KEY_CTRL_ENTER}" .accept-line
 
 # Use shifttab to go backward in the completion menu
-bindkey '^[[Z' reverse-menu-complete
+bindkey "${_KEY_SHIFT_TAB}" reverse-menu-complete
 
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
