@@ -224,6 +224,7 @@ autoload -Uz colors && colors
 
 # Allow for variables to be properly substituted
 setopt prompt_subst
+
 # Won't work inline
 local _newline=$'\n'
 local _lineup=$'\e[1A'
@@ -240,18 +241,24 @@ else
     local _host_str='%B%K{green}%F{white}%n@%m:%S'
 fi
 
+# Setup Git information
+autoload -Uz vcs_info
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+zstyle ':vcs_info:git:*' formats '%b'
+
 # Indicate whether local/ssh/tmux then user-name (%n) then short host (machine = %m) then 
 # Then add current directory (%~)
 
 #_current_path='%(5~|%-1~/…/%3~|%4~)'
 # This checks, whether the path is longer then 5 elements, and in that case prints the first element (%-1~), some dots (/…/) and the last 3 elements. It is not exactly the same as paths, that are not in your home directory, will also have the first element at the beginning, while bash just prints dots in that case. So
 
-# Shorten the path if it is longer than 60 percent of the prompt
+# Shorten the path if it is longer than 60 percent of the prompt (the 0.6 in there)
 _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
 
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
-PROMPT="${_host_str} ${_current_path} ❯❯❯%s%k%b%f "
+PROMPT="${_host_str} ${_current_path} ❯❯❯%s%k%b%f \$vcs_info_msg_0_"
 PROMPT="${PROMPT}${_newline}%B> %b"
 
 # In the right we just want the time/date
