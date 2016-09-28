@@ -30,4 +30,9 @@ text='"""
 """'
 echo "$text" > $HOME/.vim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
+if [ -z "$ZSH_VERSION"];then
+    echo "Current shell is not zsh, changing it. Please enter password."
+    chsh -s `which zsh`
+fi
+
 echo '\n\n**Congratulations! You are all set up!!**\n'
