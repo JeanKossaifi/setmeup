@@ -31,8 +31,8 @@ else
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
         # Key maps
-        _local KEY_UP="$terminfo[kcuu1]"
-        _local KEY_DOWN="$terminfo[kcud1]"
+        local _KEY_UP="$terminfo[kcuu1]"
+        local _KEY_DOWN="$terminfo[kcud1]"
 
         # Remap CAPS LOCK to Escape
         # setxkbmap -option caps:escape
