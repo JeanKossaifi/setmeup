@@ -258,7 +258,8 @@ _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n
 
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
-PROMPT="${_host_str} ${_current_path} ❯❯❯%s%k%b%f \$vcs_info_msg_0_"
+PROMPT="
+${_host_str} ${_current_path} ❯❯❯%s%k%b%f \$vcs_info_msg_0_"
 PROMPT="${PROMPT}${_newline}%B> %b"
 
 # In the right we just want the time/date
