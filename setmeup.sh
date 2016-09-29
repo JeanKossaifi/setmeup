@@ -1,4 +1,4 @@
-echo '\nPreparing install'
+echo '\n** Preparing install **'
 rm $HOME/.tmux.conf
 rm $HOME/.zshrc
 rm $HOME/.vimrc
@@ -11,11 +11,11 @@ ln -sf $PWD/vimrc $HOME/.vimrc
 mkdir -p $HOME/.config/nvim
 ln -sf $PWD/nvimrc $HOME/.config/nvim/init.vim
 
-echo '\nConfiguring vim'
+echo '\n** Configuring vim **'
 curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 vim +PlugInstall +qall
 
-echo '\nConfiguring neo-vim'
+echo '\n** Configuring neo-vim **'
 curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 nvim +PlugInstall +qall
 
@@ -30,9 +30,13 @@ text='"""
 """'
 echo "$text" > $HOME/.vim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
-if [ -z "$ZSH_VERSION"];then
-    echo "Current shell is not zsh, changing it. Please enter password."
+echo "\n** Checking you are using the correct shell.. **."
+if [ -n "$ZSH_VERSION"];
+then
+    echo "   # Good, you are already using zsh"
+else
+    echo "   # Current shell is not zsh, changing it. Please enter password."
     chsh -s `which zsh`
 fi
 
-echo '\n\n**Congratulations! You are all set up!!**\n'
+echo '\n\n*** Congratulations! You are all set up!! ***\n'
