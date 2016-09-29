@@ -30,16 +30,11 @@ else
         alias ls="ls --color=auto"
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
-        # Key maps
-        local _KEY_UP="$terminfo[kcuu1]"
-        local _KEY_DOWN="$terminfo[kcud1]"
 
         # Remap CAPS LOCK to Escape
         # setxkbmap -option caps:escape
-
         # Remap CAPS LOCK to CTRL
         setxkbmap -option ctrl:nocaps
-
         # To reset: 
         # setxkbmap -option
     fi
@@ -48,12 +43,17 @@ else
         alias ls="ls -G"
         export PLATFORM="osx"
         export PATH=$HOME/anaconda/bin:$PATH
-        # Key maps
-        local _KEY_UP="^[[A"
-        local _KEY_DOWN="^[[B"
     fi
 fi
 
+# Key maps
+if [ -n "$terminfo[kcuu1]" ]; then
+    local _KEY_UP="$terminfo[kcuu1]"
+    local _KEY_DOWN="$terminfo[kcud1]"
+else
+    local _KEY_UP="^[[A"
+    local _KEY_DOWN="^[[B"
+fi
 local _KEY_CTRL_ENTER="^J"
 # Use shifttab to go backward in the completion menu
 local _KEY_SHIFT_TAB="^[[Z"
