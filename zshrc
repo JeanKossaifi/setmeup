@@ -24,6 +24,9 @@
 if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
     # this config has already been executed at least once
+    if [[ `uname` == 'Linux' ]]; then
+        setxkbmap -option ctrl:nocaps
+    fi
 else
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
@@ -57,6 +60,8 @@ fi
 local _KEY_CTRL_ENTER="^J"
 # Use shifttab to go backward in the completion menu
 local _KEY_SHIFT_TAB="^[[Z"
+
+bindkey "kj" vi-cmd-mode
 
 ###################
 # CUSTOM COMMANDS #
