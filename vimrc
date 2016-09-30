@@ -15,9 +15,6 @@ call plug#begin('~/.vim/plugged')
     " gundo, displays undo tree
     Plug 'sjl/gundo.vim'
     
-    " Solarized color scheme
-    " Plug 'altercation/vim-colors-solarized'
-    
     " Autocomplete
     Plug 'davidhalter/jedi-vim'
     
