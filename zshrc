@@ -251,6 +251,9 @@ autoload -Uz vcs_info
 precmd_vcs_info() { vcs_info }
 precmd_functions+=( precmd_vcs_info )
 zstyle ':vcs_info:git:*' formats '%b'
+zstyle ':vcs_info:git:*' stagedstr '✓'
+zstyle ':vcs_info:git:*' unstagedstr '✘'
+local _git_info="\$vcs_info_msg_0_"
 
 # Indicate whether local/ssh/tmux then user-name (%n) then short host (machine = %m) then 
 # Then add current directory (%~)
@@ -264,7 +267,7 @@ _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
 PROMPT="
-${_host_str} ${_current_path} ❯❯❯%s%k%b%f \$vcs_info_msg_0_"
+${_host_str} ${_current_path} ❯❯❯%s%k%b%f ${_git_info}"
 PROMPT="${PROMPT}${_newline}%B> %b"
 
 # In the right we just want the time/date
