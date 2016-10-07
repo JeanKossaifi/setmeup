@@ -3,8 +3,8 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Copy and paste from the clipboard
-nnoremap ,p "+p
-nnoremap ,y "+y
+xnoremap <Leader>p "+p
+xnoremap <Leader>y "+y
 
 " Press spacebar to getout of the highlighted search and clear all displayed messages
 nnoremap <silent> <Space> : silent noh <Bar> echo <CR>
