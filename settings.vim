@@ -2,27 +2,36 @@
 """"      General vim settings :)                """"
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" General settings
 set encoding=utf-8
-
-""" Map leader and escape
-let mapleader=","
-inoremap hh <ESC>
-inoremap kj <ESC>
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
 
 " Python
-set tabstop=4     " a hard TAB displays as 4 columns
-set softtabstop=4 " insert/delete 4 spaces when hitting a TAB/BACKSPACE
-set shiftwidth=4  " operation >> indents 4 columns; << unindents 4 columns
-set textwidth=79   
-set expandtab     " insert spaces when hitting TABs
-set shiftround    " round indent to multiple of 'shiftwidth'
-set autoindent    " align the new line indent with the previous line
+au BufNewFile,BufRead *.py 
+"    \ set foldmethod=indent|
+    \ set softtabstop=4    |
+    \ set shiftwidth=4     |
+    \ set textwidth=79     |
+    \ set expandtab	   |
+    \ set autoindent       |
+    \ set fileformat=unix  |
+    \ set encoding=utf-8   |
+
+" for Restructured Text
+au BufNewFile,BufRead *.rst
+    \ set tabstop=3        |
+    \ set softtabstop=3    |
+    \ set shiftwidth=3     |
+    \ set expandtab	   | 
 
 " for other filetypes
 au BufNewFile,BufRead *.js, *.html, *.css, *.tex
     \ set tabstop=2
     \ set softtabstop=2
     \ set shiftwidth=2
+
 
 " Enable filetype plugins
 filetype indent on
@@ -52,10 +61,6 @@ set background=dark
 set ruler
 
 " set showmode
-
-" Treat long lines as break lines
-map j gj
-map k gk
 
 " Code folding
 " set foldmethod=indent
