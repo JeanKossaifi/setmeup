@@ -9,6 +9,9 @@ let mapleader=","
 inoremap hh <ESC>
 inoremap kj <ESC>
 
+" Make delete works as expected
+set backspace=indent,eol,start
+
 " Python
 set tabstop=4     " a hard TAB displays as 4 columns
 set softtabstop=4 " insert/delete 4 spaces when hitting a TAB/BACKSPACE
