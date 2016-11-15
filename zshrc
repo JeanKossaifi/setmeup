@@ -25,7 +25,7 @@ if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
     # this config has already been executed at least once
     if [[ `uname` == 'Linux' ]]; then
-        setxkbmap -option ctrl:nocaps
+        #setxkbmap -option ctrl:nocaps
     fi
 else
     export ZSH_EXECUTED_ONCE=1
@@ -78,7 +78,7 @@ export PAGER="less"
 # ALIASES
 
 # Pycharm
-alias pycharm='$HOME/pycharm_2016-2/bin/pycharm.sh &'
+alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'
 
 #####################
 #  History config   #
