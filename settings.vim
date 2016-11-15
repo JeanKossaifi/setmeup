@@ -12,8 +12,8 @@ set shiftwidth=4
 set backspace=indent,eol,start
 
 " Python
-au BufNewFile,BufRead *.py 
 "    \ set foldmethod=indent|
+au BufNewFile,BufRead *.py 
     \ set softtabstop=4    |
     \ set shiftwidth=4     |
     \ set textwidth=79     |
