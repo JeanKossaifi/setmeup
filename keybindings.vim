@@ -1,10 +1,20 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""
-""""             Custom keymaps                  """"
+""""              Basic keymaps                  """"
 """""""""""""""""""""""""""""""""""""""""""""""""""""
+
+""" Map leader and escape
+let mapleader="\\"
+" Other options: ",", "-"
+inoremap hh <ESC>
+inoremap kj <ESC>
 
 " Copy and paste from the clipboard
 xnoremap <Leader>p "+p
 xnoremap <Leader>y "+y
+
+" Treat long lines as break lines
+map j gj
+map k gk
 
 " Press spacebar to getout of the highlighted search and clear all displayed messages
 nnoremap <silent> <Space> : silent noh <Bar> echo <CR>
@@ -12,6 +22,10 @@ nnoremap <silent> <Space> : silent noh <Bar> echo <CR>
 " Launch the code in ipython
 nnoremap <silent><F5> :!ipython -i % <CR>
 " nnoremap <silent><C-F5> :!ipython -i % <CR>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""             TOOGLE keymaps                  """"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Press F2 to display columns
 let s:HitF2 = 0
