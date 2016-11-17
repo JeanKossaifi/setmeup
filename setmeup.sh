@@ -11,6 +11,10 @@ ln -sf $PWD/tmux.conf $HOME/.tmux.conf
 ln -sf $PWD/zshrc $HOME/.zshrc
 ln -sf $PWD/vimrc $HOME/.vimrc
 
+# Add alias for scripts
+echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.aliases
+echo "alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'"
+
 # For the doc vim/nvim plugin
 # We want numpy docs
 text='"""

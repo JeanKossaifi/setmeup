@@ -63,6 +63,11 @@ local _KEY_SHIFT_TAB="^[[Z"
 
 bindkey "kj" vi-cmd-mode
 
+#####################
+#      Aliases      #
+#####################
+source $HOME/.aliases
+
 ###################
 # CUSTOM COMMANDS #
 ###################
@@ -74,11 +79,6 @@ export VISUAL="vim"
 export EDITOR="vim"
 export BROWSER="google-chrome"
 export PAGER="less"
-
-# ALIASES
-
-# Pycharm
-alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'
 
 #####################
 #  History config   #
