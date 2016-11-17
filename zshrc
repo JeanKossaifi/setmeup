@@ -33,6 +33,7 @@ else
         alias ls="ls --color=auto"
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
+        export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
 
         # Remap CAPS LOCK to Escape
         # setxkbmap -option caps:escape
@@ -46,6 +47,7 @@ else
         alias ls="ls -G"
         export PLATFORM="osx"
         export PATH=$HOME/anaconda/bin:$PATH
+        export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
     fi
 fi
 

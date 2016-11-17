@@ -3,6 +3,7 @@ echo '\n** Preparing install **'
 rm $HOME/.tmux.conf
 rm $HOME/.zshrc
 rm $HOME/.vimrc
+rm $HOME/.gitconfig
 rm -rf $HOME/.config/nvim/
 rm -rf $HOME/.vim
 
@@ -10,6 +11,7 @@ rm -rf $HOME/.vim
 ln -sf $PWD/tmux.conf $HOME/.tmux.conf
 ln -sf $PWD/zshrc $HOME/.zshrc
 ln -sf $PWD/vimrc $HOME/.vimrc
+ln -sf $PWD/gitconfig $HOME/.gitconfig
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.aliases
