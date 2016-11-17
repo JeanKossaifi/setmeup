@@ -2,6 +2,9 @@
 """"      General vim settings :)                """"
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Uncomment this to copy/paste to clipboard
+"set clipboard=unnamed
+
 " General settings
 set encoding=utf-8
 set tabstop=4

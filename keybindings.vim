@@ -9,7 +9,8 @@ inoremap hh <ESC>
 inoremap kj <ESC>
 
 " Copy and paste from the clipboard
-xnoremap <Leader>p "+p
+vnoremap <Leader>p "+p
+nnoremap <Leader>p "+p
 xnoremap <Leader>y "+y
 
 " Treat long lines as break lines

@@ -48,6 +48,7 @@ let g:pymode_python = 'python3'
 
 source ~/.vim/settings.vim
 source ~/.vim/keybindings.vim
+map <Leader>n :NERDTreeToggle<CR>
 
 " Details for jedi
 "
