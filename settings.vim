@@ -17,24 +17,23 @@ au BufNewFile,BufRead *.py
     \ set softtabstop=4    |
     \ set shiftwidth=4     |
     \ set textwidth=79     |
-    \ set expandtab	   |
+    \ set expandtab	       |
     \ set autoindent       |
     \ set fileformat=unix  |
-    \ set encoding=utf-8   |
+    \ set encoding=utf-8   
 
 " for Restructured Text
 au BufNewFile,BufRead *.rst
     \ set tabstop=3        |
     \ set softtabstop=3    |
     \ set shiftwidth=3     |
-    \ set expandtab	   | 
+    \ set expandtab
 
 " for other filetypes
 au BufNewFile,BufRead *.js, *.html, *.css, *.tex
-    \ set tabstop=2
-    \ set softtabstop=2
+    \ set tabstop=2        |
+    \ set softtabstop=2    |
     \ set shiftwidth=2
-
 
 " Enable filetype plugins
 filetype indent on
