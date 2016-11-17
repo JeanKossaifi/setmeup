@@ -51,13 +51,14 @@ nvim +PlugInstall +qall
 echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
 # If zsh is not default, make it the default
+ZSH_BIN_PATH=`which zsh`
 echo "\n** Checking you are using the correct shell.. **."
 if [ -n "$ZSH_VERSION"];
 then
     echo "   # Good, you are already using zsh"
 else
     echo "   # Current shell is not zsh, changing it. Please enter password."
-    chsh -s `which zsh`
+    chsh -s ${ZSH_BIN_PATH}
 fi
 
 # Yay!

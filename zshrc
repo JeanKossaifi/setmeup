@@ -26,7 +26,10 @@ then
     # this config has already been executed at least once
     if [[ `uname` == 'Linux' ]]; then
         #setxkbmap -option ctrl:nocaps
-    fi
+        alias ls="ls --color=auto"
+    elif [[ `uname` == 'Darwin' ]]; then
+        alias ls="ls -G"
+	fi
 else
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
@@ -41,14 +44,12 @@ else
         setxkbmap -option ctrl:nocaps
         # To reset: 
         # setxkbmap -option
-    fi
-
-    if [[ `uname` == 'Darwin' ]]; then
-        alias ls="ls -G"
+    elif [[ `uname` == 'Darwin' ]]; then
         export PLATFORM="osx"
         export PATH=$HOME/anaconda/bin:$PATH
         export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
     fi
+	export ZSH_BIN_PATH=`which zsh`
 fi
 
 # Key maps
