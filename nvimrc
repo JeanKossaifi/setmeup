@@ -43,7 +43,7 @@ call plug#begin('~/.config/nvim/plugged')
 call plug#end()
 
 
-let g:python3_host_prog = '/homes/jk712/anaconda3/bin/python'
+let g:python3_host_prog = '$HOME/anaconda3/bin/python'
 let deoplete#sources#jedi#show_docstring=1
 let g:deoplete#enable_at_startup = 1
 "let g:deoplete#omni#input_patterns = 'python3'

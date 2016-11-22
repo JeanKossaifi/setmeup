@@ -12,7 +12,6 @@ ln -sf $PWD/tmux.conf $HOME/.tmux.conf
 ln -sf $PWD/zshrc $HOME/.zshrc
 ln -sf $PWD/vimrc $HOME/.vimrc
 ln -sf $PWD/gitconfig $HOME/.gitconfig
-ln -sf $PWD/xmodmap $HOME/.xmodmap
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.aliases

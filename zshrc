@@ -25,28 +25,24 @@ if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
     # this config has already been executed at least once
     if [[ `uname` == 'Linux' ]]; then
-        #setxkbmap -option ctrl:nocaps
-        alias ls="ls --color=auto"
     elif [[ `uname` == 'Darwin' ]]; then
-        alias ls="ls -G"
 	fi
 else
+	# Executing this for the first time
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
+        # Remap CAPS LOCK to Escape
+		setxkbmap -option caps:ctrl_modifier
+        # To reset: 
+        # setxkbmap -option
+		
         alias ls="ls --color=auto"
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
         export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
 
-        # Remap CAPS LOCK to Escape
-        # setxkbmap -option caps:escape
-        # Remap CAPS LOCK to CTRL
-		xmodmap -e "remove Lock = Caps_Lock"
-		xmodmap -e "keycode 66 = Control_L NoSymbol Control_L'
-        # setxkbmap -option ctrl:nocaps
-        # To reset: 
-        # setxkbmap -option
     elif [[ `uname` == 'Darwin' ]]; then
+        alias ls="ls -G"
         export PLATFORM="osx"
         export PATH=$HOME/anaconda/bin:$PATH
         export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
