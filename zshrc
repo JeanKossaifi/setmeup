@@ -41,7 +41,9 @@ else
         # Remap CAPS LOCK to Escape
         # setxkbmap -option caps:escape
         # Remap CAPS LOCK to CTRL
-        setxkbmap -option ctrl:nocaps
+		xmodmap -e "remove Lock = Caps_Lock"
+		xmodmap -e "keycode 66 = Control_L NoSymbol Control_L'
+        # setxkbmap -option ctrl:nocaps
         # To reset: 
         # setxkbmap -option
     elif [[ `uname` == 'Darwin' ]]; then
