@@ -1,4 +1,4 @@
-###################
+####################################################
 #
 # zhrc configuration
 # ==================
@@ -7,6 +7,7 @@
 # -----------------------------
 # look at the archlinux wiki page
 # https://github.com/MrElendig/dotfiles-alice/blob/master/.zshrc
+# https://dustri.org/b/my-zsh-configuration.html
 #
 #
 # Notes
@@ -19,7 +20,13 @@
 #    e.g. using ipython style prompt:
 #    In  [1]: ctrl+v [up]
 #    Out [1]: ^[OA
-###################
+#
+# 3) (CRUCIAL:) to play tetris
+#    autoload -U tetris && tetris
+#
+# 4) To show keybindings, just type bindkey
+#
+#######################################################
 
 if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
@@ -67,12 +74,12 @@ local _KEY_CTRL_ENTER="^J"
 # Use shifttab to go backward in the completion menu
 local _KEY_SHIFT_TAB="^[[Z"
 
-bindkey "kj" vi-cmd-mode
 
 #####################
 #      Aliases      #
 #####################
 source $HOME/.aliases
+alias mkdir='nocorrect mkdir'
 
 ###################
 # CUSTOM COMMANDS #
@@ -98,7 +105,9 @@ SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
 # Shared history, no duplicates
-setopt histignorealldups sharehistory
+setopt histignorealldups sharehistory 
+# don't wait exit to add to hist
+setopt inc_append_history
 
 # A better way?
 autoload -U up-line-or-beginning-search
@@ -126,6 +135,10 @@ ttyctl -f
 LS_COLORS='rs=0:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:tw=30;42:ow=34;42:st=37;44:ex=01;32:';
 export LS_COLORS
 
+# .. equivalent to cd .. if none ambiguous
+setopt AUTO_CD
+
+bindkey "kj" vi-cmd-mode
 
 #####################
 # Useful functions  #
@@ -138,7 +151,6 @@ over_ssh() {
         return 1
     fi
 }
-
 
 ######################
 #     Nicer colors   #
@@ -219,6 +231,7 @@ case $TERM in
     ;; 
 esac
 
+
 #####################
 # Set up the prompt #
 #####################
@@ -272,7 +285,12 @@ local _git_info="\$vcs_info_msg_0_"
 _current_path='%10<...<%~'
 
 # This is > unless the previous command failed in which case it is (error_numer)>
-_status='%(?..%F{red}(%?%))>%f'
+_status='%(?..%F{red}(%?%))>%f '
+
+# Add to prompt to display whoisconnected
+watch=all                       # watch all logins
+logcheck=30                     # every 30 seconds
+_whoishere="%n from %M has %a tty%l at %T %W"
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
 PROMPT="
@@ -280,4 +298,6 @@ ${_host_str} ${_current_path} ❯❯❯%s%k%b%f ${_git_info}"
 PROMPT="${PROMPT}${_newline}%B${_status}%b"
 
 # In the right we just want the time/date
-RPROMPT="%{${_lineup}%}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
+RPROMPT="%{${_lineup}%}${_vim_mode}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
+
+
