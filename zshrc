@@ -26,6 +26,8 @@ then
     # this config has already been executed at least once
     if [[ `uname` == 'Linux' ]]; then
         alias ls="ls --color=auto"
+		# Somehow this gets deactivated sometime -_-
+		setxkbmap -option caps:ctrl_modifier
     elif [[ `uname` == 'Darwin' ]]; then
         alias ls="ls -G"
 	fi
@@ -34,10 +36,11 @@ else
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
         # Remap CAPS LOCK to Escape
+		# Make sure CAPS LOCK is deactivated anyway
+		python -c 'from ctypes import *; X11 = cdll.LoadLibrary("libX11.so.6"); display = X11.XOpenDisplay(None); X11.XkbLockModifiers(display, c_uint(0x0100), c_uint(2), c_uint(0)); X11.XCloseDisplay(display)'
 		setxkbmap -option caps:ctrl_modifier
         # To reset: 
         # setxkbmap -option
-		
         alias ls="ls --color=auto"
         export PLATFORM="linux"
         export PATH=$HOME/anaconda3/bin:$PATH
@@ -265,14 +268,16 @@ local _git_info="\$vcs_info_msg_0_"
 # This checks, whether the path is longer then 5 elements, and in that case prints the first element (%-1~), some dots (/…/) and the last 3 elements. It is not exactly the same as paths, that are not in your home directory, will also have the first element at the beginning, while bash just prints dots in that case. So
 
 # Shorten the path if it is longer than 60 percent of the prompt (the 0.6 in there)
-_current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
+# _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
+_current_path='%10<...<%~'
 
+# This is > unless the previous command failed in which case it is (error_numer)>
+_status='%(?..%F{red}(%?%))>%f'
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
 PROMPT="
 ${_host_str} ${_current_path} ❯❯❯%s%k%b%f ${_git_info}"
-PROMPT="${PROMPT}${_newline}%B> %b"
+PROMPT="${PROMPT}${_newline}%B${_status}%b"
 
 # In the right we just want the time/date
 RPROMPT="%{${_lineup}%}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
-
