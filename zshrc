@@ -25,7 +25,9 @@ if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
     # this config has already been executed at least once
     if [[ `uname` == 'Linux' ]]; then
+        alias ls="ls --color=auto"
     elif [[ `uname` == 'Darwin' ]]; then
+        alias ls="ls -G"
 	fi
 else
 	# Executing this for the first time
