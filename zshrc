@@ -271,11 +271,17 @@ precmd_vcs_info() {
 	vcs_info 
 }
 precmd_functions+=( precmd_vcs_info )
+
+zstyle ':vcs_info:git+post-backend:*' hooks git-count-commits-ahead
++vi-git-count-commits-ahead() {
+	hook_com[branch]+="↑"
+	hook_com[branch]+=`git rev-list --count origin/master...@`
+}
 # Check the status
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:git:*' stagedstr '%F{green}✓%f'
 zstyle ':vcs_info:git:*' unstagedstr '%F{red}✘%f'
-zstyle ':vcs_info:git:*' formats '[%r-%b]%c%u (%a)'
+zstyle ':vcs_info:git:*' formats '[%r-%b]%c%u %a'
 local _git_info=$'$vcs_info_msg_0_'
 
 _current_path='%(6~|%-2~/…/%3~|%5~)'
