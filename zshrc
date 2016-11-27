@@ -27,17 +27,9 @@
 # 4) To show keybindings, just type bindkey
 #
 #######################################################
-
 if [[ -n "${ZSH_EXECUTED_ONCE}" ]];
 then
     # this config has already been executed at least once
-    if [[ `uname` == 'Linux' ]]; then
-        alias ls="ls --color=auto"
-		# Somehow this gets deactivated sometime -_-
-		setxkbmap -option caps:ctrl_modifier
-    elif [[ `uname` == 'Darwin' ]]; then
-        alias ls="ls -G"
-	fi
 else
 	# Executing this for the first time
     export ZSH_EXECUTED_ONCE=1
@@ -62,6 +54,17 @@ else
 	export ZSH_BIN_PATH=`which zsh`
 fi
 
+# Execute everytime
+if [[ `uname` == 'Linux' ]]; then
+	alias ls="ls --color=auto"
+	setxkbmap -option caps:ctrl_modifier
+	alias -s pdf=evince
+elif [[ `uname` == 'Darwin' ]]; then
+	alias ls="ls -G"
+	alias -s pdf=open
+fi
+
+
 # Key maps
 if [ -n "$terminfo[kcuu1]" ]; then
     local _KEY_UP="$terminfo[kcuu1]"
@@ -80,6 +83,11 @@ local _KEY_SHIFT_TAB="^[[Z"
 #####################
 source $HOME/.aliases
 alias mkdir='nocorrect mkdir'
+
+# Suffix aliases (match the end)
+# e.g. typing test.py will execute python test.py
+alias -s py="python"
+alias -s tex="mkpdf -vs -n"
 
 ###################
 # CUSTOM COMMANDS #
