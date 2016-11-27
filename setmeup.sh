@@ -1,3 +1,12 @@
+############
+# Setmeup:
+# --------
+# 
+# Removes existing configuration
+# Replaces it with symbolic links to the configurations in the git repo
+# Sets up vim/neo-vim and the extensions
+# Makes sure zsh is the default
+
 # Remove existing configs
 echo '\n** Preparing install **'
 rm $HOME/.tmux.conf
