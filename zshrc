@@ -85,8 +85,6 @@ alias mkdir='nocorrect mkdir'
 # CUSTOM COMMANDS #
 ###################
 
-# VARIABLES
-
 # Python path
 export VISUAL="vim"
 export EDITOR="vim"
@@ -129,21 +127,20 @@ bindkey "${_KEY_DOWN}" down-line-or-beginning-search
 #####################
 
 # In case a command freezes the terminal, to avoid need for manual restart
+# TODO check this
 ttyctl -f
-
-# Colors for ls
-LS_COLORS='rs=0:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:tw=30;42:ow=34;42:st=37;44:ex=01;32:';
-export LS_COLORS
 
 # .. equivalent to cd .. if none ambiguous
 setopt AUTO_CD
 
+# Vim-mode, escape with kj
 bindkey "kj" vi-cmd-mode
 
 #####################
 # Useful functions  #
 #####################
 
+# True if connected over ssh
 over_ssh() {
     if [[ -n "${SSH_CLIENT}"  ||  -n "${SSH2_CLIENT}" ]]; then 
         return 0
@@ -155,6 +152,10 @@ over_ssh() {
 ######################
 #     Nicer colors   #
 ######################
+
+# Colors for ls
+LS_COLORS='rs=0:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:tw=30;42:ow=34;42:st=37;44:ex=01;32:';
+export LS_COLORS
 
 # coloured manuals
 man() {
@@ -284,8 +285,8 @@ zstyle ':vcs_info:git:*' unstagedstr '%F{red}✘%f'
 zstyle ':vcs_info:git:*' formats '[%r-%b]%c%u %a'
 local _git_info=$'$vcs_info_msg_0_'
 
-_current_path='%(6~|%-2~/…/%3~|%5~)'
 # This checks, whether the path is longer then 6 elements, and in that case prints the first 2 elements (%-2~), dots (/…/) and the last 3 elements.
+_current_path='%(6~|%-2~/…/%3~|%5~)'
 
 # Shorten the path if it is longer than 60 percent of the prompt (the 0.6 in there)
 # _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
