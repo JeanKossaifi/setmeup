@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/zsh
 clear
 
 ###############################################################
@@ -91,10 +91,12 @@ do
              exit 1
              ;;
          n)
-             name=${OPTARG}
+             name="${OPTARG:r}"
+			 echo "name = " $name
              ;;
          o)
-             output="$OPTARG"
+             output=${OPTARG:r}
+			 echo $name
              ;;
          v)
 			 view=$((1-${view}))
