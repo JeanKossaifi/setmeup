@@ -267,30 +267,30 @@ fi
 
 # Setup Git information
 autoload -Uz vcs_info
-precmd_vcs_info() { vcs_info }
+precmd_vcs_info() { 
+	vcs_info 
+}
 precmd_functions+=( precmd_vcs_info )
-zstyle ':vcs_info:git:*' formats '%b'
-zstyle ':vcs_info:git:*' stagedstr '✓'
-zstyle ':vcs_info:git:*' unstagedstr '✘'
-local _git_info="\$vcs_info_msg_0_"
+# Check the status
+zstyle ':vcs_info:*' check-for-changes true
+zstyle ':vcs_info:git:*' stagedstr '%F{green}✓%f'
+zstyle ':vcs_info:git:*' unstagedstr '%F{red}✘%f'
+zstyle ':vcs_info:git:*' formats '[%r-%b]%c%u (%a)'
+local _git_info=$'$vcs_info_msg_0_'
 
-# Indicate whether local/ssh/tmux then user-name (%n) then short host (machine = %m) then 
-# Then add current directory (%~)
-
-#_current_path='%(5~|%-1~/…/%3~|%4~)'
-# This checks, whether the path is longer then 5 elements, and in that case prints the first element (%-1~), some dots (/…/) and the last 3 elements. It is not exactly the same as paths, that are not in your home directory, will also have the first element at the beginning, while bash just prints dots in that case. So
+_current_path='%(6~|%-2~/…/%3~|%5~)'
+# This checks, whether the path is longer then 6 elements, and in that case prints the first 2 elements (%-2~), dots (/…/) and the last 3 elements.
 
 # Shorten the path if it is longer than 60 percent of the prompt (the 0.6 in there)
 # _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
-_current_path='%10<...<%~'
 
 # This is > unless the previous command failed in which case it is (error_numer)>
 _status='%(?..%F{red}(%?%))>%f '
 
 # Add to prompt to display whoisconnected
-watch=all                       # watch all logins
-logcheck=30                     # every 30 seconds
-_whoishere="%n from %M has %a tty%l at %T %W"
+# watch=all                       # watch all logins
+# logcheck=30                     # every 30 seconds
+# _whoishere="%n from %M has %a tty%l at %T %W"
 
 #PROMPT="${_host_str} %~ ❯❯❯%s%k%b%f "
 PROMPT="
@@ -299,5 +299,4 @@ PROMPT="${PROMPT}${_newline}%B${_status}%b"
 
 # In the right we just want the time/date
 RPROMPT="%{${_lineup}%}${_vim_mode}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
-
 
