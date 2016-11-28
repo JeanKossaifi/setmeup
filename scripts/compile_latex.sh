@@ -92,11 +92,9 @@ do
              ;;
          n)
              name="${OPTARG:r}"
-			 echo "name = " $name
              ;;
          o)
              output=${OPTARG:r}
-			 echo $name
              ;;
          v)
 			 view=$((1-${view}))
