@@ -12,7 +12,7 @@
 #
 # Notes
 # -----
-# 1) Useful utf characters: λ ✔ ✓ ✘ ✢ ➤ ✖ ❯ ❮ ✚ ✹ ➜ ═ ✭ 
+# 1) Useful utf characters: λ ✔ ✓ ✘ ✢ ➤ ✖ ❯ ❮ ✚ ✹ ➜ ═ ✭  ▶
 #
 # 2) To get the key-code of any key (say KEY), in the shell:
 #    Ctrl+v KEY
@@ -300,7 +300,8 @@ _current_path='%(6~|%-2~/…/%3~|%5~)'
 # _current_path='$(pwd|awk -F/ -v "n=$(tput cols)" -v "h=^$HOME" '\''{sub(h,"~");n=0.6*n;b=$1"/"$2} length($0)<=n || NF==3 {print;next;} NF>3{b=b"/../"; e=$NF; n-=length(b $NF); for (i=NF-1;i>3 && n>length(e)+1;i--) e=$i"/"e;} {print b e;}'\'')'
 
 # This is > unless the previous command failed in which case it is (error_numer)>
-_status='%(?..%F{red}(%?%))>%f '
+# _status='%(?..%F{red}(%?%))>%f '
+_status='%(?..%F{red})>%f '
 
 # Add to prompt to display whoisconnected
 # watch=all                       # watch all logins

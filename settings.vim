@@ -19,11 +19,11 @@ set backspace=indent,eol,start
 au BufNewFile,BufRead *.py 
     \ set softtabstop=4    |
     \ set shiftwidth=4     |
-    \ set textwidth=79     |
     \ set expandtab	       |
     \ set autoindent       |
     \ set fileformat=unix  |
     \ set encoding=utf-8   
+"    \ set textwidth=79     |
 
 " for Restructured Text
 au BufNewFile,BufRead *.rst
@@ -53,7 +53,7 @@ set hlsearch
 set incsearch
 
 " Coloration syntaxique
-syntax on
+syntax enable
 
 " Couleurs adaptees a un fond sombre
 set background=dark
