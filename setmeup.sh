@@ -72,7 +72,7 @@ else
 	if [[ `uname` == 'Linux' ]]; then
 		chsh -s ${ZSH_BIN_PATH}
 	elif [[ `uname` == 'Darwin' ]]; then
-		sudo echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
+		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
 		chsh -s ${ZSH_BIN_PATH}
 	fi
 fi
