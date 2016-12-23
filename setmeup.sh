@@ -63,12 +63,18 @@ echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/m
 # If zsh is not default, make it the default
 ZSH_BIN_PATH=`which zsh`
 echo "\n** Checking you are using the correct shell.. **."
-if [ -n "$ZSH_VERSION"];
+# if [ -n "$ZSH_VERSION"];
+if [[ -n "${ZSH_VERSION/[ ]*\n/}" ]]
 then
     echo "   # Good, you are already using zsh"
 else
     echo "   # Current shell is not zsh, changing it. Please enter password."
-    chsh -s ${ZSH_BIN_PATH}
+	if [[ `uname` == 'Linux' ]]; then
+		chsh -s ${ZSH_BIN_PATH}
+	elif [[ `uname` == 'Darwin' ]]; then
+		sudo echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
+		chsh -s ${ZSH_BIN_PATH}
+	fi
 fi
 
 # Yay!
