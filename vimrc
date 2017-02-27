@@ -25,10 +25,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'vim-airline/vim-airline'
     
     " On the flight syntax check
-    Plug 'scrooloose/syntastic'
-    
-    " Source-code browser
-    " Plug 'majutsushi/tagbar'
+    Plug 'w0rp/ale'
     
     " Auto doc-strings (on def, :Pydocstring or <C-l>)
     Plug 'heavenshell/vim-pydocstring'
@@ -36,11 +33,14 @@ call plug#begin('~/.vim/plugged')
     " Better indentation for Python
     Plug 'vim-scripts/indentpython.vim'
 
-    Plug 'nvie/vim-flake8'
+    " Plug 'nvie/vim-flake8'
 
     " Add the 's' (surrounding) option
     " see :help surround
     Plug 'tpope/vim-surround'
+
+	" view css colors in code
+	Plug 'ap/vim-css-color'
 
 call plug#end()
 
