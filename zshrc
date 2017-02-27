@@ -90,6 +90,7 @@ alias mkdir='nocorrect mkdir'
 # e.g. typing test.py will execute python test.py
 alias -s py="python"
 alias -s tex="mkpdf -vs -n"
+# alias -s unpushed="!GIT_CURRENT_BRANCH=$(git name-rev --name-only HEAD) && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline"
 
 ###################
 # CUSTOM COMMANDS #
