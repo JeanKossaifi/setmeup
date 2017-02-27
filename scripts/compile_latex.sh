@@ -149,12 +149,13 @@ if [[ ($silent == 1) ]]; then
     noout() {
         "$@" >/dev/null 2>&1
     }
-	makepdf="noout pdflatex -interaction=batchmode -output-directory=${temp_dir} $sourcefile"
+        # --shell-espcape: for includesvg 
+	makepdf="noout pdflatex --shell-espcape -interaction=batchmode -output-directory=${temp_dir} $sourcefile"
 else
     noout() {
         "$@"
     }
-	makepdf="pdflatex -output-directory=${temp_dir} $sourcefile"
+	makepdf="pdflatex --shell-espcape -output-directory=${temp_dir} $sourcefile"
 fi
 
 
