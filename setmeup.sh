@@ -13,11 +13,13 @@ rm $HOME/.tmux.conf
 rm $HOME/.zshrc
 rm $HOME/.vimrc
 rm $HOME/.gitconfig
+rm $HOME/.pypirc
 rm -rf $HOME/.config/nvim/
 rm -rf $HOME/.vim
 
 # Copy conf files (symlinks)
 ln -sf $PWD/tmux.conf $HOME/.tmux.conf
+ln -sf $PWD/pypirc $HOME/.pypirc
 ln -sf $PWD/zshrc $HOME/.zshrc
 ln -sf $PWD/vimrc $HOME/.vimrc
 ln -sf $PWD/gitconfig $HOME/.gitconfig
@@ -62,12 +64,18 @@ echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/m
 # If zsh is not default, make it the default
 ZSH_BIN_PATH=`which zsh`
 echo "\n** Checking you are using the correct shell.. **."
-if [ -n "$ZSH_VERSION"];
+# if [ -n "$ZSH_VERSION"];
+if [[ -n "${ZSH_VERSION/[ ]*\n/}" ]]
 then
     echo "   # Good, you are already using zsh"
 else
     echo "   # Current shell is not zsh, changing it. Please enter password."
-    chsh -s ${ZSH_BIN_PATH}
+	if [[ `uname` == 'Linux' ]]; then
+		chsh -s ${ZSH_BIN_PATH}
+	elif [[ `uname` == 'Darwin' ]]; then
+		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
+		chsh -s ${ZSH_BIN_PATH}
+	fi
 fi
 
 # Yay!
