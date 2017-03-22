@@ -25,7 +25,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'vim-airline/vim-airline'
     
     " On the flight syntax check
-    Plug 'w0rp/ale'
+    " Plug 'w0rp/ale'
     
     " Auto doc-strings (on def, :Pydocstring or <C-l>)
     Plug 'heavenshell/vim-pydocstring'

@@ -6,6 +6,8 @@
 # Replaces it with symbolic links to the configurations in the git repo
 # Sets up vim/neo-vim and the extensions
 # Makes sure zsh is the default
+CPY='ln -sf'
+CPY='cp'
 
 # Remove existing configs
 echo '\n** Preparing install **'
@@ -18,11 +20,11 @@ rm -rf $HOME/.config/nvim/
 rm -rf $HOME/.vim
 
 # Copy conf files (symlinks)
-ln -sf $PWD/tmux.conf $HOME/.tmux.conf
-ln -sf $PWD/pypirc $HOME/.pypirc
-ln -sf $PWD/zshrc $HOME/.zshrc
-ln -sf $PWD/vimrc $HOME/.vimrc
-ln -sf $PWD/gitconfig $HOME/.gitconfig
+$CPY $PWD/tmux.conf $HOME/.tmux.conf
+$CPY $PWD/pypirc $HOME/.pypirc
+$CPY $PWD/zshrc $HOME/.zshrc
+$CPY $PWD/vimrc $HOME/.vimrc
+$CPY $PWD/gitconfig $HOME/.gitconfig
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
@@ -43,8 +45,8 @@ text='"""
 # Vim configuration
 echo '\n** Configuring vim **'
 mkdir $HOME/.vim
-ln -sf $PWD/settings.vim $HOME/.vim/settings.vim
-ln -sf $PWD/keybindings.vim $HOME/.vim/keybindings.vim
+$CPY $PWD/settings.vim $HOME/.vim/settings.vim
+$CPY $PWD/keybindings.vim $HOME/.vim/keybindings.vim
 curl -fLo $HOME/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 vim +PlugInstall +qall
 # Modify the default docstring
@@ -53,9 +55,9 @@ echo "$text" > $HOME/.vim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 # Neo-vim configuration
 echo '\n** Configuring neo-vim **'
 mkdir -p $HOME/.config/nvim
-ln -sf $PWD/nvimrc $HOME/.config/nvim/init.vim
-ln -sf $PWD/settings.vim $HOME/.config/nvim/settings.vim
-ln -sf $PWD/keybindings.vim $HOME/.config/nvim/keybindings.vim
+$CPY $PWD/nvimrc $HOME/.config/nvim/init.vim
+$CPY $PWD/settings.vim $HOME/.config/nvim/settings.vim
+$CPY $PWD/keybindings.vim $HOME/.config/nvim/keybindings.vim
 curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 nvim +PlugInstall +qall
 # Modify the default docstring

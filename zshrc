@@ -78,7 +78,7 @@ local _KEY_CTRL_ENTER="^J"
 local _KEY_SHIFT_TAB="^[[Z"
 
 
-source $HOME/.aliases
+# source $HOME/.aliases
 
 
 #####################
