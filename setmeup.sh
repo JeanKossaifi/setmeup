@@ -7,7 +7,7 @@
 # Sets up vim/neo-vim and the extensions
 # Makes sure zsh is the default
 CPY='ln -sf'
-CPY='cp'
+#CPY='cp'
 
 # Remove existing configs
 echo '\n** Preparing install **'
@@ -28,7 +28,10 @@ $CPY $PWD/gitconfig $HOME/.gitconfig
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
-echo "alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'" >> $HOME/.local_zshrc
+echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
+# echo "alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'" >> $HOME/.local_zshrc
+export PATH=$HOME/anaconda3/bin:$PATH
+export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
 
 # For the doc vim/nvim plugin
 # We want numpy docs
