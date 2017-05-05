@@ -28,6 +28,7 @@ $CPY $PWD/gitconfig $HOME/.gitconfig
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
+echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
 echo "alias pycharm='$HOME/pycharm-2016.2.3/bin/pycharm.sh &'" >> $HOME/.local_zshrc
 
 # For the doc vim/nvim plugin

@@ -35,21 +35,14 @@ else
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
         # Remap CAPS LOCK to Escape
-		# Make sure CAPS LOCK is deactivated anyway
-		python -c 'from ctypes import *; X11 = cdll.LoadLibrary("libX11.so.6"); display = X11.XOpenDisplay(None); X11.XkbLockModifiers(display, c_uint(0x0100), c_uint(2), c_uint(0)); X11.XCloseDisplay(display)'
-		setxkbmap -option caps:ctrl_modifier
-        # To reset: 
-        # setxkbmap -option
         alias ls="ls --color=auto"
         export PLATFORM="linux"
-        export PATH=$HOME/anaconda3/bin:$PATH
-        export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
 
     elif [[ `uname` == 'Darwin' ]]; then
         alias ls="ls -G"
         export PLATFORM="osx"
-        export PATH=$HOME/anaconda/bin:$PATH
-        export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH
+        export PATH=$HOME/anaconda3/bin:$PATH
+        export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
     fi
 	export ZSH_BIN_PATH=`which zsh`
 fi
@@ -57,13 +50,17 @@ fi
 # Execute everytime
 if [[ `uname` == 'Linux' ]]; then
 	alias ls="ls --color=auto"
-	setxkbmap -option caps:ctrl_modifier
 	alias -s pdf=evince
 elif [[ `uname` == 'Darwin' ]]; then
 	alias ls="ls -G"
 	alias -s pdf=open
 fi
 
+
+# Path
+source $HOME/.local_zshrc
+export PATH=$HOME/anaconda3/bin:$PATH
+export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
 
 # Key maps
 if [ -n "$terminfo[kcuu1]" ]; then
@@ -318,4 +315,5 @@ PROMPT="${PROMPT}${_newline}%B${_status}%b"
 
 # In the right we just want the time/date
 RPROMPT="%{${_lineup}%}${_vim_mode}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
+
 

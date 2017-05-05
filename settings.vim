@@ -55,9 +55,9 @@ set incsearch
 " Coloration syntaxique
 syntax enable
 
-" Couleurs adaptees a un fond sombre
-set background=dark
-" set background=light
+" Set color depending on background
+" set background=dark
+set background=light
 
 " Display current command
 " set showcmd
