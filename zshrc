@@ -34,15 +34,14 @@ else
 	# Executing this for the first time
     export ZSH_EXECUTED_ONCE=1
     if [[ `uname` == 'Linux' ]]; then
-        # Remap CAPS LOCK to Escape
         alias ls="ls --color=auto"
         export PLATFORM="linux"
 
     elif [[ `uname` == 'Darwin' ]]; then
         alias ls="ls -G"
         export PLATFORM="osx"
-        export PATH=$HOME/anaconda3/bin:$PATH
-        export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
+        # export PATH=$HOME/anaconda3/bin:$PATH
+        # export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
     fi
 	export ZSH_BIN_PATH=`which zsh`
 fi
@@ -73,9 +72,6 @@ fi
 local _KEY_CTRL_ENTER="^J"
 # Use shifttab to go backward in the completion menu
 local _KEY_SHIFT_TAB="^[[Z"
-
-
-# source $HOME/.aliases
 
 
 #####################
@@ -316,4 +312,4 @@ PROMPT="${PROMPT}${_newline}%B${_status}%b"
 # In the right we just want the time/date
 RPROMPT="%{${_lineup}%}${_vim_mode}❮%F{white}%K{black} %w - %T%f%k❯%{${_linedown}%}"
 
-
+source $HOME/.local_zshrc
