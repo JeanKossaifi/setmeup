@@ -16,7 +16,9 @@ call plug#begin('~/.vim/plugged')
     Plug 'sjl/gundo.vim'
     
     " Autocomplete
-    Plug 'davidhalter/jedi-vim'
+    " Plug 'davidhalter/jedi-vim'
+	" Plug 'maralla/validator.vim'
+	" Plug 'maralla/completor.vim'
     
     " Nerd-tree
     Plug 'scrooloose/nerdtree'
@@ -25,7 +27,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'vim-airline/vim-airline'
     
     " On the flight syntax check
-    " Plug 'w0rp/ale'
+    Plug 'w0rp/ale'
     
     " Auto doc-strings (on def, :Pydocstring or <C-l>)
     Plug 'heavenshell/vim-pydocstring'
@@ -44,11 +46,17 @@ call plug#begin('~/.vim/plugged')
 
 call plug#end()
 
-let g:pymode_python = 'python3'
+" let g:pymode_python = 'python3'
+let g:completor_python_binary = '$HOME/anaconda3/lib/python3.6/site-packages/jedi'
+let g:completor_auto_trigger = 1
 
 source ~/.vim/settings.vim
 source ~/.vim/keybindings.vim
 map <Leader>n :NERDTreeToggle<CR>
+
+" Airline all the time
+set laststatus=2
+
 
 " Details for jedi
 "

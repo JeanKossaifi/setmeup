@@ -44,10 +44,9 @@ call plug#end()
 
 
 let g:python3_host_prog = '$HOME/anaconda3/bin/python'
-let deoplete#sources#jedi#show_docstring=1
+let g:deoplete#sources#jedi#show_docstring=1
 let g:deoplete#enable_at_startup = 1
-"let g:deoplete#omni#input_patterns = 'python3'
-
+" let g:deoplete#omni#input_patterns = 'python3'
 
 let NVIM_TUI_ENABLE_CURSOR_SHAPE = 1
 
@@ -68,7 +67,6 @@ let NERDTreeIgnore=['\.pyc$', '\~$']
 
 " Air-line
 set laststatus=2
-
 
 source ~/.config/nvim/settings.vim
 source ~/.config/nvim/keybindings.vim
