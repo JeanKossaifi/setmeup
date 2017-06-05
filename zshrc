@@ -83,6 +83,11 @@ alias mkdir='nocorrect mkdir'
 alias -s py="python"
 alias -s tex="mkpdf -vs -n"
 alias -s unpushed="!GIT_CURRENT_BRANCH=$(git name-rev --name-only HEAD) && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline"
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+alias -g .......='../../../../../..'
 
 ###################
 # CUSTOM COMMANDS #
