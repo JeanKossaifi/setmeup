@@ -72,10 +72,13 @@ fi
 
 echo "Launching notebook..."
 # ip=127.0.0.1 means that it can only be reached from localhost.
-if [[ ($token == 1) ]]; then
-	jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1 --NotebookApp.token='${token}'
-else if [[ ($token == 2) ]]; then
-	jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1
+if [[ ($use_token == 1) ]]; then
+	echo "Starting notebook with the given token"
+    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1 --NotebookApp.token="${token}"
+elif [[ ($use_token == 2) ]]; then
+	echo "Starting notebook with a randomly generated token"
+    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1
 else
-	jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1  --NotebookApp.token=''
+	echo "Starting notebook with no token"
+    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1  --NotebookApp.token=''
 fi
