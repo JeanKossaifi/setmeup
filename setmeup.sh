@@ -32,7 +32,7 @@ echo "*****************************************************"
 }
 
 COPY_FILES=0;
-while getopts "h?c" OPTION;
+while getopts "hc" OPTION;
 do
 	case $OPTION in
 		h|\?)
@@ -44,7 +44,8 @@ do
 	esac
 done
 
-if ((${COPY_FILES} == 1)); then
+if [ $COPY_FILES -eq 1 ]
+then
 	echo "\n** Configuration files will be copied.. **."
 	CPY='cp -r'
 else
