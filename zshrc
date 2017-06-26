@@ -77,6 +77,7 @@ local _KEY_SHIFT_TAB="^[[Z"
 #      Aliases      #
 #####################
 alias mkdir='nocorrect mkdir'
+alias python='ipython -i'
 
 # Suffix aliases (match the end)
 # e.g. typing test.py will execute python test.py
