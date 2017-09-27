@@ -40,7 +40,7 @@ else
     elif [[ `uname` == 'Darwin' ]]; then
         alias ls="ls -G"
         export PLATFORM="osx"
-        # export PATH=$HOME/anaconda3/bin:$PATH
+        # export PATH=$HOME/anaconda/bin:$PATH
         # export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
     fi
 	export ZSH_BIN_PATH=`which zsh`
@@ -57,8 +57,8 @@ fi
 
 # Path
 source $HOME/.local_zshrc
-export PATH=$HOME/anaconda3/bin:$PATH
-export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
+export PATH=$HOME/anaconda/bin:$PATH
+export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda/bin:$PYTHONPATH
 
 # Key maps
 if [ -n "$terminfo[kcuu1]" ]; then
@@ -77,7 +77,7 @@ local _KEY_SHIFT_TAB="^[[Z"
 #      Aliases      #
 #####################
 alias mkdir='nocorrect mkdir'
-alias python='ipython -i'
+# alias python='ipython -i'
 
 # Suffix aliases (match the end)
 # e.g. typing test.py will execute python test.py

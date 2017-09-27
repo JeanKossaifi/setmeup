@@ -54,8 +54,8 @@ do
 done
 
 
-echo "Open ssh tunnel:"
-PUBLIC_HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
+#echo "Open ssh tunnel:"
+#PUBLIC_HOST=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname)
 echo "ssh -nNT -L 8888:127.0.0.1:8888 ubuntu@$PUBLIC_HOST"
 echo "Connect to:"
 echo "http://localhost:8888/"
