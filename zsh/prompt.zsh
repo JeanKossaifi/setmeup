@@ -46,7 +46,6 @@ fi
 # 	hook_com[branch]+=`git rev-list --count origin/master...@`
 # }
 
-
 # Check the status
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:git:*' stagedstr '%F{green}✓%f'
