@@ -25,6 +25,17 @@ nnoremap <silent><F5> :!ipython -i % <CR>
 " nnoremap <silent><C-F5> :!ipython -i % <CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""
+""""      disable and reuse arrow keys           """"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Disable arrow keys
+let g:elite_mode=1
+" Remap them to resize splits instead
+nnoremap <Up>    :resize +2<CR>
+nnoremap <Down>  :resize -2<CR>
+nnoremap <Left>  :vertical resize +2<CR>
+nnoremap <Right> :vertical resize -2<CR>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 """"             TOOGLE keymaps                  """"
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 

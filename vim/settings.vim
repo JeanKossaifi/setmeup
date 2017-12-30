@@ -11,7 +11,7 @@ set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 
-" Make delete works as expected
+" Allow to delete through intent, end-of-line, over the start of insert
 set backspace=indent,eol,start
 
 " Python
@@ -52,7 +52,7 @@ set hlsearch
 " Makes search act like search in modern browsers
 set incsearch
 
-" Coloration syntaxique
+" Syntax coloring
 syntax enable
 
 " Set color depending on background
@@ -74,6 +74,10 @@ set ruler
 set spelllang=en
 map <leader>ss :setlocal spell!<CR>
 
+" Highlight under current character
+highlight Cursor guibg=yellow 
+highlight Cursor ctermbg=yellow
+" #626262
 "enable cursor line in current window only"
 augroup CursorLine
     au!
