@@ -137,10 +137,9 @@ else
     echo "* Creating folder ${temp_dir} for temporary files."
     if [[ ($nobib == 0) ]]; then
 		cp ./*.bib ${temp_dir}
-		aux="${temp_dir}/${name}.aux"
-		aux="${name}.aux"
 	fi
 fi
+aux="${name}.aux"
 sourcefile="${name}.tex"
 target="${output}.pdf"
 compiled="${temp_dir}/${name}.pdf"
@@ -206,10 +205,10 @@ function compile {
 		echo "*                Bibliography    :                       *"
 		echo "**********************************************************"
 		dir_before="$(pwd)"
-		# cd $temp_dir
+		cd $temp_dir
 		echo `pwd`
-		bibtex "${temp_dir}/${aux}"
-		# cd $dir_before
+		bibtex "${aux}"
+		cd $dir_before
 		if [ $? -eq 0 ]; then
 			echo 
 			echo "**** Bibliography creation went great :) ****"
