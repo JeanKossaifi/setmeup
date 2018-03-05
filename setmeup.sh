@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 clear
 
 usage()
@@ -25,6 +25,7 @@ BASIC OPTIONS:
 
 ADVANCED OPTIONS:
    -c         Copy the files rather than creating symbolic links.
+   -a	      (AMAZON) Use this if you are setting up an EC2 instance
 
 By Jean KOSSAIFI <jean [dot] kossaifi [at] gmail.com>
 EOF
@@ -32,7 +33,7 @@ echo "*****************************************************"
 }
 
 COPY_FILES=0;
-while getopts "hc" OPTION;
+while getopts "hca" OPTION;
 do
 	case $OPTION in
 		h|\?)
@@ -40,6 +41,8 @@ do
 			exit 0
 			;;
 		c) COPY_FILES=1
+			;;
+		a) AMZ=1
 			;;
 	esac
 done
@@ -118,10 +121,17 @@ if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
 then
     echo "   # Good, you are already using zsh"
 else
-    echo "   # Current shell is not zsh, changing it. Please enter password."
 	if [[ `uname` == 'Linux' ]]; then
-		chsh -s ${ZSH_BIN_PATH}
+		if [ $AMZ -eq 1 ]
+		then
+			echo "   # Current shell is not zsh, changing it."
+			sudo chsh ubuntu -s ${ZSH_BIN_PATH}
+		else
+			echo "   # Current shell is not zsh, changing it. Please enter password."
+			chsh -s ${ZSH_BIN_PATH}
+		fi
 	elif [[ `uname` == 'Darwin' ]]; then
+		echo "   # Current shell is not zsh, changing it. Please enter password."
 		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
 		chsh -s ${ZSH_BIN_PATH}
 	fi
