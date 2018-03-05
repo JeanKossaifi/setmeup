@@ -79,8 +79,8 @@ $CPY $PWD/zsh $HOME/.zsh
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
 echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
-export PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
-export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH >> $HOME/.local_zshrc
+echo PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
+echo PYTHONPATH=$HOME/anaconda3/bin:$PYTHONPATH >> $HOME/.local_zshrc
 
 # For the doc vim/nvim plugin
 # We want numpy docs
