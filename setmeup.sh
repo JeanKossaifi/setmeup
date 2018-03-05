@@ -124,28 +124,26 @@ fi
 # If zsh is not default, make it the default
 ZSH_BIN_PATH=`which zsh`
 printf "\n** Checking you are using the correct shell.. **."
-if [ -z "$ZSH_BIN_PATH"];
+if [ -z "$ZSH_BIN_PATH" ];
 then
 	echo "ZSH is not installed... Install it or suffer bash"
+elif [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
+then
+	echo "   # Good, you are already using zsh"
 else
-	if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
-	then
-		echo "   # Good, you are already using zsh"
-	else
-		if [[ `uname` == 'Linux' ]]; then
-			if [ $AMZ -eq 1 ]
-			then
-				echo "   # Current shell is not zsh, changing it."
-				sudo chsh ubuntu -s ${ZSH_BIN_PATH}
-			else
-				echo "   # Current shell is not zsh, changing it. Please enter password."
-				chsh -s ${ZSH_BIN_PATH}
-			fi
-		elif [[ `uname` == 'Darwin' ]]; then
+	if [[ `uname` == 'Linux' ]]; then
+		if [ $AMZ -eq 1 ]
+		then
+			echo "   # Current shell is not zsh, changing it."
+			sudo chsh ubuntu -s ${ZSH_BIN_PATH}
+		else
 			echo "   # Current shell is not zsh, changing it. Please enter password."
-			echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
 			chsh -s ${ZSH_BIN_PATH}
 		fi
+	elif [[ `uname` == 'Darwin' ]]; then
+		echo "   # Current shell is not zsh, changing it. Please enter password."
+		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
+		chsh -s ${ZSH_BIN_PATH}
 	fi
 fi
 
