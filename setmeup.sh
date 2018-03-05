@@ -33,6 +33,7 @@ echo "*****************************************************"
 }
 
 COPY_FILES=0;
+AMZ=0;
 while getopts "hca" OPTION;
 do
 	case $OPTION in
@@ -49,15 +50,15 @@ done
 
 if [ $COPY_FILES -eq 1 ]
 then
-	echo "\n** Configuration files will be copied.. **."
+	printf "\n** Configuration files will be copied.. **."
 	CPY='cp -r'
 else
-	echo "\n** Configuration files will be symbolic links.. **."
+	printf "\n** Configuration files will be symbolic links.. **."
 	CPY='ln -sf'
 fi
 
 # Remove existing configs
-echo '\n** Preparing install **'
+printf '\n** Preparing install **'
 rm $HOME/.tmux.conf
 rm $HOME/.zshrc
 rm $HOME/.vimrc
@@ -94,7 +95,7 @@ text='"""
 """'
 
 # Vim configuration
-echo '\n** Configuring vim **'
+printf '\n** Configuring vim **'
 mkdir $HOME/.vim
 $CPY $PWD/vim/settings.vim $HOME/.vim/settings.vim
 $CPY $PWD/vim/keybindings.vim $HOME/.vim/keybindings.vim
@@ -104,36 +105,47 @@ vim +PlugInstall +qall
 echo "$text" > $HOME/.vim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
 # Neo-vim configuration
-echo '\n** Configuring neo-vim **'
-mkdir -p $HOME/.config/nvim
-$CPY $PWD/vim/nvimrc $HOME/.config/nvim/init.vim
-$CPY $PWD/vim/settings.vim $HOME/.config/nvim/settings.vim
-$CPY $PWD/vim/keybindings.vim $HOME/.config/nvim/keybindings.vim
-curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-nvim +PlugInstall +qall
-# Modify the default docstring
-echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
+NEOVIM_PATH=`which nvim`
+if [ -z "$NEOVIM_PATH" ];
+then
+	printf "\nNeo-vim not installed..."
+else
+	printf '\n** Configuring neo-vim **'
+	mkdir -p $HOME/.config/nvim
+	$CPY $PWD/vim/nvimrc $HOME/.config/nvim/init.vim
+	$CPY $PWD/vim/settings.vim $HOME/.config/nvim/settings.vim
+	$CPY $PWD/vim/keybindings.vim $HOME/.config/nvim/keybindings.vim
+	curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	nvim +PlugInstall +qall
+	# Modify the default docstring
+	echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
+fi
 
 # If zsh is not default, make it the default
 ZSH_BIN_PATH=`which zsh`
-echo "\n** Checking you are using the correct shell.. **."
-if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
+printf "\n** Checking you are using the correct shell.. **."
+if [ -z "$ZSH_BIN_PATH"];
 then
-    echo "   # Good, you are already using zsh"
+	echo "ZSH is not installed... Install it or suffer bash"
 else
-	if [[ `uname` == 'Linux' ]]; then
-		if [ $AMZ -eq 1 ]
-		then
-			echo "   # Current shell is not zsh, changing it."
-			sudo chsh ubuntu -s ${ZSH_BIN_PATH}
-		else
+	if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
+	then
+		echo "   # Good, you are already using zsh"
+	else
+		if [[ `uname` == 'Linux' ]]; then
+			if [ $AMZ -eq 1 ]
+			then
+				echo "   # Current shell is not zsh, changing it."
+				sudo chsh ubuntu -s ${ZSH_BIN_PATH}
+			else
+				echo "   # Current shell is not zsh, changing it. Please enter password."
+				chsh -s ${ZSH_BIN_PATH}
+			fi
+		elif [[ `uname` == 'Darwin' ]]; then
 			echo "   # Current shell is not zsh, changing it. Please enter password."
+			echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
 			chsh -s ${ZSH_BIN_PATH}
 		fi
-	elif [[ `uname` == 'Darwin' ]]; then
-		echo "   # Current shell is not zsh, changing it. Please enter password."
-		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
-		chsh -s ${ZSH_BIN_PATH}
 	fi
 fi
 
@@ -145,6 +157,6 @@ fi
 
 
 # Yay!
-echo '\n\n*** Congratulations! You are all set up!! ***\n'
+printf '\n\n*** Congratulations! You are all set up!! ***\n'
 
 
