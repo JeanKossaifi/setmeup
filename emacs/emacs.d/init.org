@@ -1,0 +1,401 @@
+#+TODO: BROKEN CHECK TODO
+#+PROPERTY: header-args :tangle yes
+
+* Package Manager
+** Initialize
+   #+BEGIN_SRC emacs-lisp
+     (require 'package)
+     (package-initialize)
+   #+END_SRC
+** Add .emacs.d/extra to path
+   #+BEGIN_SRC emacs-lisp
+   (add-to-list 'load-path "~/.emacs.d/extra")
+   #+END_SRC
+** Disable automatic package loading
+   #+BEGIN_SRC emacs-lisp
+     (setq package-enable-at-startup nil)
+   #+END_SRC
+** Set up package archives
+   #+BEGIN_SRC emacs-lisp
+     (setq package-archives '(("melpa-stable" . "https://stable.melpa.org/packages/")
+                              ("melpa" . "http://melpa.milkbox.net/packages/")
+                              ("marmalade" . "http://marmalade-repo.org/packages/")
+                              ("gnu" . "http://elpa.gnu.org/packages/")))
+   #+END_SRC
+** Use-package
+  #+BEGIN_SRC emacs-lisp
+    (require 'use-package)
+  #+END_SRC
+* Personal Info
+  #+BEGIN_SRC emacs-lisp
+    (setq user-full-name "Shamindra Shrotriya"
+          user-mail-address "shamindra@cmu.edu")
+  #+END_SRC
+* Appearance
+** Remove GUI cruft
+  #+BEGIN_SRC emacs-lisp
+    (setq inhibit-splash-screen t)
+    (tool-bar-mode 0)
+    (menu-bar-mode 0)
+    (scroll-bar-mode -1)
+  #+END_SRC
+** Theme
+  #+BEGIN_SRC emacs-lisp	     
+    (use-package cyberpunk-theme)
+  #+END_SRC
+** Font
+  #+BEGIN_SRC emacs-lisp
+    (set-frame-font "DejaVu Sans Mono-10")
+  #+END_SRC
+** Get rid of messages
+   #+BEGIN_SRC emacs-lisp
+     (setq-default message-log-max nil)
+     (kill-buffer "*Messages*")
+   #+END_SRC
+* Misc
+** Set backup directories
+   #+BEGIN_SRC emacs-lisp
+     (setq backup-directory-alist '(("." ."~/.emacs.d/backups")))
+     (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+   #+END_SRC
+** All y/n for yes or no
+   #+BEGIN_SRC emacs-lisp
+     (fset 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
+** Don't require sentences to end in double spaces
+   #+BEGIN_SRC emacs-lisp
+     (setq sentence-end-double-space nil)
+   #+END_SRC
+** Use spaces for tabs
+   #+BEGIN_SRC emacs-lisp
+     (setq-default indent-tabs-mode nil)
+   #+END_SRC
+** Remove completions after use
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'minibuffer-exit-hook
+           '(lambda ()
+              (let ((buffer "*Completions*"))
+                (and (get-buffer buffer)
+                     (kill-buffer buffer)))))
+   #+END_SRC
+
+* Tramp
+  #+BEGIN_SRC emacs-lisp
+    ;; Faster than default scp
+    (setq tramp-default-method "ssh")
+  #+END_SRC
+* ws-butler
+   #+BEGIN_SRC emacs-lisp
+   (ws-butler-global-mode t)
+   #+END_SRC
+* Helm
+  #+BEGIN_SRC emacs-lisp
+    (use-package helm-config
+      :defer t
+      :config
+      (progn
+        (setq helm-candidate-number-limit 10
+              helm-idle-delay 0.0
+              helm-input-idle-delay 0.01
+              helm-quick-update t
+              helm-M-x-requires-pattern nil)
+        )
+      :init (progn
+              (helm-mode 1)
+              (add-to-list 'helm-completing-read-handlers-alist '(LaTeX-environment)))
+      :bind (("M-y" . helm-show-kill-ring)
+             ("C-x C-f" . helm-find-files)
+             ("M-x" . helm-M-x)
+             ("C-x b" . helm-mini))
+      )
+  #+END_SRC
+** Helm-Bibtex
+   #+BEGIN_SRC emacs-lisp
+     (use-package helm-bibtex
+       :defer t
+       :config
+       (progn
+         (setq bibtex-completion-bibliography "~/bib/master.bib")
+         (setq bibtex-completion-library-path "~/bib/pdfs")
+         (setq bibtex-completion-notes-path "~/bib/notes")
+         (setq bibtex-completion-notes-extension ".org")))
+   #+END_SRC
+* Hippie Expand
+  #+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "M-/") 'hippie-expand)
+
+    (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                             try-expand-dabbrev-all-buffers 
+                                             try-expand-dabbrev-from-kill
+                                             try-complete-file-name-partially 
+                                             try-complete-file-name
+                                             try-expand-all-abbrevs 
+                                             try-expand-list 
+                                             try-expand-line
+                                             try-complete-lisp-symbol-partially
+                                             try-complete-lisp-symbol))
+  #+END_SRC
+* LaTeX
+** AUCTEX
+   #+BEGIN_SRC emacs-lisp
+    (progn 
+      (setq TeX-PDF-mode t)
+      (setq TeX-auto-save t)
+      (setq TeX-view-program-list '(("apvlv" "apvlv %o")))
+      (setq TeX-view-program-selection '((output-pdf "apvlv")))
+      (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1)))
+      
+      (setq TeX-auto-save nil))
+  #+END_SRC
+** Pretty Symbols
+   #+BEGIN_SRC emacs-lisp
+     (use-package latex-pretty-symbols
+       :defer t)
+   #+END_SRC
+** Extra
+   #+BEGIN_SRC emacs-lisp
+     (add-hook 'LaTeX-mode-hook #'latex-extra-mode)
+   #+END_SRC
+* ESS
+  #+BEGIN_SRC emacs-lisp
+    (use-package ess-site
+      :defer t
+      :mode (("\\.jl\\'" . ess-julia-mode)
+             ("\\.R\\'" . R-mode))
+      :config
+      (progn
+        (setq ess-ask-for-ess-directory nil)
+        (setq ess-default-style 'RStudio)
+        (setq ess-indent-with-fancy-comments nil)
+        (setq ess-eval-visibly 'nowait)
+
+        ;;; R
+        (setq inferior-R-args "--no-save --no-restore --silent")
+
+        ;;; Julia
+        (setq inferior-julia-program "julia")
+        (add-hook 'julia-mode-hook (lambda () (set-input-method "TeX")))
+        )
+      )
+#+END_SRC
+* Org Mode
+  #+BEGIN_SRC emacs-lisp
+    (use-package org
+      :defer t
+      :config
+      (progn
+        (setq org-support-shift-select t)
+        (setq org-ellipsis "⤵")
+        (setq org-pretty-entities t)
+        (setq safe-local-variable-values (quote ((org-latex-hyperref-template))))
+        ))
+
+    (use-package ob-async
+      :defer t)
+  #+END_SRC
+** Org Babel
+   #+BEGIN_SRC emacs-lisp
+     (use-package ob
+       :defer t
+       :init
+       (progn
+         (org-babel-do-load-languages
+          'org-babel-load-languages
+          '((emacs-lisp . t)
+            (R . t)
+            (ruby . t)
+            (octave . t)
+            (dot . t)
+            (latex . t)
+            (python . t)
+            (ipython .t)
+            (shell . t))
+          )
+         )
+       :config
+       (progn
+         (setq org-babel-python-command "python")
+         (setq org-babel-julia-command "julia")
+
+         (setq org-confirm-babel-evaluate nil)
+
+         (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+         (add-hook 'org-mode-hook 'org-display-inline-images)
+
+         (setq-default org-src-fontify-natively t)
+         )
+       )
+   #+END_SRC
+** Org Export
+   #+BEGIN_SRC emacs-lisp
+     (use-package ox-extra
+       :config
+       (progn
+         (ox-extras-activate '(ignore-headlines))))
+
+     (use-package ox-rst)
+     (use-package ox-reveal)
+     (use-package ox-latex
+       :config
+       (progn
+         (add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
+         (setq org-latex-listings 'minted)
+         (setq org-latex-pdf-process (list "latexmk -pdflatex='pdflatex --shell-escape' -pdf %f"))
+
+         (defun org-export-latex-no-toc (depth)
+           (when depth
+             (format "%% Org-mode is exporting headings to %s levels.\n"
+                     depth)))
+         (setq org-export-latex-format-toc-function 'org-export-latex-no-toc)))
+   #+END_SRC
+* Python
+  #+BEGIN_SRC emacs-lisp
+    (use-package python
+      :defer t
+      :mode ("\\.py\\'" . python-mode)
+      :interpreter ("python" . python-mode)
+      :config
+      (progn
+        (defvar python-mode-initialized nil)
+        (setq python-shell-interpreter "ipython"
+              python-shell-interpreter-args ""
+              python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+              python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+              python-shell-completion-setup-code
+              "from IPython.core.completerlib import module_completion"
+              python-shell-completion-string-code
+              "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+              python-indent-offset 4
+        )
+        (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+        (add-to-list 'auto-mode-alist '("\\.pyx\\'" . python-mode))
+      )
+#+END_SRC
+
+* Ruby
+  #+BEGIN_SRC emacs-lisp
+    (use-package ruby-mode
+      :defer t
+      :mode (("\\.rb\\'" . ruby-mode)
+             ("Rakefile\\'" . ruby-mode))
+      :interpreter ("ruby" . ruby-mode)
+    )
+  #+END_SRC 
+* Magit
+  #+BEGIN_SRC emacs-lisp
+    (use-package magit
+      :defer t
+      :bind (("\C-cg" . magit-status))
+      :config
+      (progn
+        (setq magit-last-seen-setup-instructions "1.4.0")
+        (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)))
+  #+END_SRC
+* Multi-term
+  #+BEGIN_SRC emacs-lisp
+    (use-package multi-term
+      :defer t
+      :config
+      (progn
+        (setq multi-term-program "/bin/zsh")
+        )
+      )
+  #+END_SRC
+* eshell
+  #+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "C-c s") 'eshell)
+  #+END_SRC
+* avy
+  #+BEGIN_SRC emacs-lisp
+    (use-package avy
+      :defer t
+      :ensure t
+      :bind (("M-s" . avy-goto-word-1)))
+  #+END_SRC
+* org2jekyll
+  #+BEGIN_SRC emacs-lisp
+        (use-package org2jekyll
+          :defer t
+          :config
+          (progn
+            (custom-set-variables '(org2jekyll-blog-author "minimallysufficient")
+                                  '(org2jekyll-source-directory (expand-file-name "~/blog/_org/posts"))
+                                  '(org2jekyll-jekyll-directory (expand-file-name "~/blog/"))
+                                  '(org2jekyll-jekyll-drafts-dir "_drafts/")
+                                  '(org2jekyll-jekyll-posts-dir "_posts/")
+                                  '(org-publish-project-alist
+                                    `(("default"
+                                       :base-directory ,(org2jekyll-input-directory)
+                                       :base-extension "org"
+                                       :publishing-directory ,(org2jekyll-output-directory)
+                                       :publishing-function org-html-publish-to-html
+                                       :headline-levels 4
+                                       :section-numbers nil
+                                       :with-toc nil
+                                       :html-preamble t
+                                       :recursive t
+                                       :make-index t
+                                       :html-extension "html"
+                                       :body-only t)
+                                      ("post"
+                                       :base-directory ,(org2jekyll-input-directory)
+                                       :base-extension "org"
+                                       :publishing-directory ,(org2jekyll-output-directory org2jekyll-jekyll-posts-dir)
+                                       :publishing-function org-html-publish-to-html
+                                       :headline-levels 4
+                                       :section-numbers nil
+                                       :with-toc nil
+                                       :html-preamble t
+                                       :recursive t
+                                       :make-index t
+                                       :html-extension "html"
+                                       :body-only t)
+                                      ("images"
+                                       :base-directory ,(org2jekyll-input-directory "img")
+                                       :base-extension "jpg\\|gif\\|png"
+                                       :publishing-directory ,(org2jekyll-output-directory "img")
+                                       :publishing-function org-publish-attachment
+                                       :recursive t)
+                                      ("js"
+                                       :base-directory ,(org2jekyll-input-directory "js")
+                                       :base-extension "js"
+                                       :publishing-directory ,(org2jekyll-output-directory "js")
+                                       :publishing-function org-publish-attachment
+                                       :recursive t)
+                                      ("css"
+                                       :base-directory ,(org2jekyll-input-directory "css")
+                                       :base-extension "css\\|el"
+                                       :publishing-directory ,(org2jekyll-output-directory "css")
+                                       :publishing-function org-publish-attachment
+                                       :recursive t)
+                                      ("web" :components ("images" "js" "css")))))
+            ))
+  #+END_SRC
+* Org-Ref
+  #+BEGIN_SRC emacs-lisp
+    (use-package org-ref)
+  #+END_SRC
+* Elfeed
+  #+BEGIN_SRC emacs-lisp
+    (use-package elfeed
+      :bind (("C-c w" . elfeed))
+      :config
+      (setf url-queue-timeout 30)
+      )
+  #+END_SRC
+** Elfeed Org
+   #+BEGIN_SRC emacs-lisp
+     (use-package elfeed-org
+       :init
+       (elfeed-org)
+       )
+   #+END_SRC
+* Polymodes
+  #+BEGIN_SRC emacs-lisp
+    (use-package poly-markdown
+      :defer t
+      :mode (("\\.md" . poly-markdown-mode)))
+    (use-package poly-R
+      :defer t
+      :mode (("\\.Rmd" . poly-markdown+r-mode)))
+  #+END_SRC
