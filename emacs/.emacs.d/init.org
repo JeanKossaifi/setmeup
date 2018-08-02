@@ -78,6 +78,19 @@
                 (and (get-buffer buffer)
                      (kill-buffer buffer)))))
    #+END_SRC
+* Mac OSX
+  Source: https://github.com/larstvei/dot-emacs/blob/master/init.org#mac-os-x
+
+   #+BEGIN_SRC emacs-lisp
+   (when (memq window-system '(mac ns))
+     (setq ns-pop-up-frames nil
+           mac-option-modifier nil
+           mac-command-modifier 'meta
+           x-select-enable-clipboard t)
+     (exec-path-from-shell-initialize)
+     (when (fboundp 'mac-auto-operator-composition-mode)
+       (mac-auto-operator-composition-mode 1)))'
+   #+END_SRC
 
 * Tramp
   #+BEGIN_SRC emacs-lisp
