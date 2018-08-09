@@ -138,7 +138,7 @@ else
 			sudo chsh ubuntu -s ${ZSH_BIN_PATH}
 		else
 			echo "   # Current shell is not zsh, changing it. Please enter password."
-			chsh -s ${ZSH_BIN_PATH}
+			chsh -s ${ZSH_BIN_PATH} $(whoami)
 		fi
 	elif [[ `uname` == 'Darwin' ]]; then
 		echo "   # Current shell is not zsh, changing it. Please enter password."
