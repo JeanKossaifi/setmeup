@@ -1,16 +1,38 @@
-;; This file replaces itself with the actual configuration at first run.
-;; Source: https://github.com/larstvei/dot-emacs/blob/master/init.el
+;; Adapted from here: https://github.com/danielmai/.emacs.d/blob/master/init.el
 
-;; Check whether we need to set the user-emacs directory here
-;; e.g. https://github.com/cbrecabarren/user-emacs-directory/blob/master/init.el#L2
+;;; Begin initialization
+;; Turn off mouse interface early in startup to avoid momentary display
+(when window-system
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tooltip-mode -1))
 
-;; We can't tangle without org!
-(require 'org)
-;; Open the configuration
-(find-file (concat user-emacs-directory "init.org"))
-;; tangle it
-(org-babel-tangle)
-;; load it
-(load-file (concat user-emacs-directory "init.el"))
-;; finally byte-compile it
-(byte-compile-file (concat user-emacs-directory "init.el"))
+(setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+
+;;; Set up package
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(when (boundp 'package-pinned-packages)
+  (setq package-pinned-packages
+        '((org-plus-contrib . "org"))))
+(package-initialize)
+
+;;; Bootstrap use-package
+;; Install use-package if it's not already installed.
+;; use-package is used to configure the rest of the packages.
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; From use-package README
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)                ;; if you use :diminish
+(require 'bind-key)
+
+;;; Load the config
+(org-babel-load-file (concat user-emacs-directory "init.org"))
