@@ -9,7 +9,7 @@
  '(org-hide-leading-stars t)
  '(org-startup-folded 'overview)
  '(org-startup-indented t)
- '(package-selected-packages '(counsel try use-package)))
+ '(package-selected-packages '(rainbow-mode monokai-theme counsel try use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

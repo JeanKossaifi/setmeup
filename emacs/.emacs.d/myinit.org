@@ -40,9 +40,9 @@ customize settings in [[file:init.el][init.el]].
 * Theme
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[https://github.com/sandhu/emacs.d/blob/master/config/008-ui-config.el][Sandhu's emacs config]]
 
-** Solarized theme
+** Solarized Light
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package solarized-theme :ensure t
   :init (progn
           (setq solarized-high-contrast-mode-line t
@@ -52,6 +52,16 @@ customize settings in [[file:init.el][init.el]].
                 x-underline-at-descent-line t)
           (load-theme 'solarized-light 'no-confirm))
   :config (setq color-theme-is-global t))
+#+END_SRC
+
+** Monokai theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package monokai-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (setq monokai-use-variable-pitch nil))
 #+end_src
 
 ** Cyberpunk theme
@@ -59,7 +69,7 @@ customize settings in [[file:init.el][init.el]].
 The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
 boxes around the mode line.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package cyberpunk-theme
   :if (window-system)
   :ensure t
@@ -78,16 +88,6 @@ depending on the time of day or my mood. Normally, switching themes is
 a multi-step process with ~disable-theme~ and ~load-theme~. The
 ~switch-theme~ function will do that in one swoop. I just choose which
 theme I want to go to.
-
-** Monokai theme
-
-#+begin_src emacs-lisp :tangle no
-(use-package monokai-theme
-  :if (window-system)
-  :ensure t
-  :init
-  (setq monokai-use-variable-pitch nil))
-#+end_src
 
 ** Waher theme
 
@@ -198,7 +198,6 @@ the emacs-ac-emoji package.]]
 ;; Turn off the toolbar
 (tool-bar-mode -1)
 
-(setq-default indent-tabs-mode nil)
 (setq-default indicate-empty-lines t)
 
 ;; Don't count two spaces after a period as the end of a sentence.
@@ -224,6 +223,10 @@ the emacs-ac-emoji package.]]
 ;; Don't beep at me
 (setq visible-bell nil)
 (setq ring-bell-function 'ignore)
+
+;; Get rus of messages
+(setq-default message-log-max nil)
+(kill-buffer "*Messages*")
 #+end_src
 
 The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -420,7 +423,11 @@ behavior when typing a templated snippet.
   :ensure t
   :diminish yas-minor-mode
   :config
-  (setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
+  (setq ss/yas-snippets-dir (let ((dir (concat user-emacs-directory
+                                                   "snippets/")))
+                                  (make-directory dir :parents)
+                                  dir))
+  (setq yas-snippet-dirs (list 'ss/yas-snippets-dir))
   (setq yas-indent-line 'fixed)
   (yas-global-mode))
 #+end_src
@@ -670,21 +677,30 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
   #+END_SRC
 * Python
+*Source:* Taylor Pospisil's config (communicated personally)
   #+BEGIN_SRC emacs-lisp
+    (use-package python
+      :defer t
+      :mode ("\\.py\\'" . python-mode)
+      :interpreter ("python" . python-mode)
+      :config
+      (progn
+        (defvar python-mode-initialized nil)
+        (setq python-shell-interpreter "ipython"
+              python-shell-interpreter-args ""
+              python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+              python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+              python-shell-completion-setup-code
+              "from IPython.core.completerlib import module_completion"
+              python-shell-completion-string-code
+              "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+              python-indent-offset 4
+        )
+        (setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+        (add-to-list 'auto-mode-alist '("\\.pyx\\'" . python-mode))
+      )
+#+END_SRC
 
-        (setq py-python-command "python3")
-        (setq python-shell-interpreter "python3")
-
-
-            (use-package elpy
-            :ensure t
-            :config
-            (elpy-enable))
-
-  #+END_SRC
-
-  #+RESULTS:
-  : t
 * Undo Tree
   #+BEGIN_SRC emacs-lisp
     (use-package undo-tree
@@ -692,6 +708,12 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
       :init
       (global-undo-tree-mode))
   #+END_SRC
+* Rainbow
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-mode 
+  :ensure t
+  :diminish rainbow-mode)
+#+END_SRC
 * Misc packages
   #+BEGIN_SRC emacs-lisp
 
@@ -860,70 +882,6 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
 
 
-#+END_SRC
-* powerline
-*Source:* [[https://github.com/sandhu/emacs.d/blob/master/config/008-ui-config.el][Sandhu's emacs config]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package powerline :ensure t
-  :init (setq powerline-default-separator 'wave)
-  :config (progn
-            (require 'powerline)
-            (add-hook 'desktop-after-read-hook 'powerline-reset)
-            (defface modes-ml-face '((t (:background "#002b36" :inherit mode-line)))
-              "Powerline face for modes section of the mode-line"
-              :group 'powerline)
-            (defface file-ml-face '((t (:background "#586e75" :inherit mode-line)))
-              "Powerline face for file and branch section of the mode-line"
-              :group 'powerline)
-            (defface line-ml-face '((t (:background "#93a1a1" :inherit mode-line)))
-              "Powerline face for line number section of the mode-line"
-              :group 'powerline)
-            (defface pos-ml-face '((t (:background "#586e75" :inherit mode-line)))
-              "Powerline face for file position section of the mode-line"
-              :group 'powerline)
-            (defface ml-fill-face '((t (:background "#93a1a1" :inherit mode-line)))
-              "Powerline face used to fill the unused portion of the mode-line"
-              :group 'powerline)
-            (setq-default mode-line-format
-                          '("%e"
-                            (:eval
-                             (let* ((file-name (buffer-file-name (current-buffer)))
-                                    (active (powerline-selected-window-active))
-                                    (separator-left (intern (format "powerline-%s-%s"
-                                                                    (powerline-current-separator)
-                                                                    (car powerline-default-separator-dir))))
-                                    (separator-right (intern (format "powerline-%s-%s"
-                                                                     (powerline-current-separator)
-                                                                     (cdr powerline-default-separator-dir))))
-                                    (lhs (list (powerline-major-mode 'modes-ml-face 'l)
-                                               (powerline-process 'modes-ml-face 'l)
-                                               (powerline-minor-modes 'modes-ml-face 'l)
-                                               (powerline-raw " " 'modes-ml-face)
-                                               (funcall separator-left 'modes-ml-face 'file-ml-face)
-
-                                               (powerline-raw "[" 'file-ml-face)
-                                               (powerline-raw (projectile-project-name) 'file-ml-face)
-                                               (powerline-raw "] %b %*" 'file-ml-face)
-                                               (powerline-raw (concat " "
-                                                                      (when (and file-name vc-mode)
-                                                                        (concat "(" (-> file-name
-                                                                                        vc-working-revision
-                                                                                        (string-utils-truncate-to 40))
-                                                                                ")")))
-                                                              'file-ml-face 'r)
-                                               (funcall separator-left 'file-ml-face 'ml-fill-face)))
-
-                                    (rhs (list (powerline-raw global-mode-string 'ml-fill-face 'r)
-                                               (funcall separator-right 'ml-fill-face 'pos-ml-face)
-                                               (powerline-raw "%p " 'pos-ml-face 'l)
-                                               (funcall separator-right 'pos-ml-face 'line-ml-face)
-
-                                               (powerline-raw " %4l " 'line-ml-face 'r))))
-
-                               (concat (powerline-render lhs)
-                                       (powerline-fill 'ml-fill-face (powerline-width rhs))
-                                       (powerline-render rhs))))))))
 #+END_SRC
 * Testing Stuff
 #+BEGIN_SRC emacs-lisp
