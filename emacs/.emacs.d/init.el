@@ -1,3 +1,16 @@
+(setq gc-cons-threshold 400000000)
+
+;;; Begin initialization
+;; Turn off mouse interface early in startup to avoid momentary display
+(when window-system
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tooltip-mode -1))
+
+(setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
@@ -14,6 +27,7 @@
   (package-install 'use-package))
 
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
+(setq gc-cons-threshold 800000)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -32,3 +46,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(aw-leading-char-face ((t (:inherit ace-jump-face-foreground :height 3.0)))))
+

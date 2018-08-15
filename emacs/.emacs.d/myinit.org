@@ -1,34 +1,436 @@
 #+STARTUP: overview
 #+OPTIONS: toc:nil num:nil
 
-* repos
+* Repos
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 
 #+END_SRC
-* interface tweaks
+
+* Personal Info
+
+#+begin_src emacs-lisp
+(setq user-full-name "Shamindra Shrotriya"
+      user-mail-address "shamindra.shrotriya@gmail.com")
+#+end_src
+
+* Load myinit.org
+*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
 #+BEGIN_SRC emacs-lisp
-(setq inhibit-startup-message t)
+(global-set-key (kbd "C-c i") 
+(lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
+#+END_SRC
+
+* diminish 
+#+BEGIN_SRC emacs-lisp
+(use-package diminish :ensure t)
+#+END_SRC
+* Customize settings
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+Set up the customize file to its own separate file, instead of saving
+customize settings in [[file:init.el][init.el]].
+
+#+begin_src emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file)
+#+end_src
+
+* Theme
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+** Cyberpunk theme
+
+The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
+boxes around the mode line.
+
+#+begin_src emacs-lisp
+(use-package cyberpunk-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (progn
+    (load-theme 'cyberpunk t)
+    (set-face-attribute `mode-line nil
+                        :box nil)
+    (set-face-attribute `mode-line-inactive nil
+                        :box nil)))
+#+end_src
+
+I tend to switch themes more often than normal. For example, switching
+to a lighter theme (such as the default) or to a different theme
+depending on the time of day or my mood. Normally, switching themes is
+a multi-step process with ~disable-theme~ and ~load-theme~. The
+~switch-theme~ function will do that in one swoop. I just choose which
+theme I want to go to.
+** Solarized theme
+
+Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
+
+#+begin_src emacs-lisp
+(use-package solarized-theme
+  :defer 10
+  :init
+  (setq solarized-use-variable-pitch nil)
+  :ensure t)
+#+end_src
+
+** Monokai theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package monokai-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (setq monokai-use-variable-pitch nil))
+#+end_src
+
+** Waher theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package waher-theme
+  if (window-system)
+  :ensure t
+  :init
+  (load-theme 'waher))
+#+end_src
+
+** Convenient theme functions
+
+#+begin_src emacs-lisp
+(defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+  (let ((enabled-themes custom-enabled-themes))
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme theme t)))
+
+(defun disable-active-themes ()
+  "Disables any currently active themes listed in `custom-enabled-themes'."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(bind-key "s-<f12>" 'switch-theme)
+(bind-key "s-<f11>" 'disable-active-themes)
+#+end_src
+
+* Font
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
+[[http://adobe-fonts.github.io/source-code-pro/][Source Code Pro]] is a nice monospaced font.
+
+To install it on macOS, you can use Homebrew with [[http://caskroom.io/][Homebrew Cask]].
+
+#+begin_src sh :tangle no
+# You may need to run these two lines if you haven't set up Homebrew
+# Cask and its fonts formula.
+brew install caskroom/cask/brew-cask
+brew tap caskroom/fonts
+
+brew cask install font-source-code-pro
+#+end_src
+
+And here's how we tell Emacs to use the font we want to use.
+
+#+begin_src emacs-lisp
+(add-to-list 'default-frame-alist
+             '(font . "Source Code Pro-28"))
+#+end_src
+
+We can set the default font size:
+#+BEGIN_SRC emacs-lisp
+(set-frame-font "Source Code Pro-28")
+#+END_SRC
+
+Note: To view all fonts that are available to use, run the following:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(font-family-list)
+#+END_SRC
+
+Display emojis. Source of system-specific fonts is in [[https://github.com/syohex/emacs-ac-emoji][the README for
+the emacs-ac-emoji package.]]
+
+#+BEGIN_SRC emacs-lisp
+(let ((font (if (= emacs-major-version 25)
+                "Symbola"
+              (cond ((string-equal system-type "darwin")    "Apple Color Emoji")
+                    ((string-equal system-type "gnu/linux") "Symbola")))))
+  (set-fontset-font t 'unicode font nil 'prepend))
+#+END_SRC
+* Sane defaults
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+#+begin_src emacs-lisp
+;; These functions are useful. Activate them.
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Answering just 'y' or 'n' will do
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; Keep all backup and auto-save files in one directory
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+;; UTF-8 please
+(setq locale-coding-system 'utf-8) ; pretty
+(set-terminal-coding-system 'utf-8) ; pretty
+(set-keyboard-coding-system 'utf-8) ; pretty
+(set-selection-coding-system 'utf-8) ; please
+(prefer-coding-system 'utf-8) ; with sugar on top
+(setq-default indent-tabs-mode nil)
+
+;; Turn off the blinking cursor
+(blink-cursor-mode -1)
+
+;; Turn off the toolbar
 (tool-bar-mode -1)
-(fset 'yes-or-no-p 'y-or-n-p)
-(global-set-key (kbd "<f5>") 'revert-buffer)
-#+END_SRC
 
-* try
-#+BEGIN_SRC emacs-lisp
-(use-package try
-	:ensure t)
-#+END_SRC
+(setq-default indent-tabs-mode nil)
+(setq-default indicate-empty-lines t)
 
-* OSX related
-#+BEGIN_SRC emacs-lisp
+;; Don't count two spaces after a period as the end of a sentence.
+;; Just one space is needed.
+(setq sentence-end-double-space nil)
+
+;; delete the region when typing, just like as we expect nowadays.
+(delete-selection-mode t)
+
+(show-paren-mode t)
+
+(line-number-mode 1)
+(column-number-mode t)
+
+(global-visual-line-mode)
+(diminish 'visual-line-mode)
+
+(setq uniquify-buffer-name-style 'forward)
+
+;; -i gets alias definitions from .bash_profile
+(setq shell-command-switch "-ic")
+
+;; Don't beep at me
+(setq visible-bell nil)
+(setq ring-bell-function 'ignore)
+#+end_src
+
+The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
+[[http://oremacs.com/2015/01/26/occur-dwim/][his blog post at (or emacs]]. It takes the current region or the symbol
+at point as the default value for occur.
+
+#+begin_src emacs-lisp
+(defun occur-dwim ()
+  "Call `occur' with a sane default."
+  (interactive)
+  (push (if (region-active-p)
+            (buffer-substring-no-properties
+             (region-beginning)
+             (region-end))
+          (thing-at-point 'symbol))
+        regexp-history)
+  (call-interactively 'occur))
+
+(bind-key "M-s o" 'occur-dwim)
+#+end_src
+
+Here we make page-break characters look pretty, instead of appearing
+as =^L= in Emacs. [[http://ericjmritz.name/2015/08/29/using-page-breaks-in-gnu-emacs/][Here's an informative article called "Using
+Page-Breaks in GNU Emacs" by Eric J. M. Ritz.]]
+
+#+begin_src emacs-lisp
+(use-package page-break-lines
+  :ensure t)
+#+end_src
+
+* Mac customizations
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[http://ergoemacs.org/emacs/emacs_hyper_super_keys.html][Xah Lee's mac config]]
+
+There are configurations to make when running Emacs on macOS (hence the
+"darwin" system-type check).
+
+#+begin_src emacs-lisp
 ;; set keys for Apple keyboard, for emacs in OS X
-;; via http://ergoemacs.org/emacs/emacs_hyper_super_keys.html
 (setq mac-command-modifier 'meta) ; make cmd key do Meta
 (setq mac-option-modifier 'super) ; make opt key do Super
 (setq mac-control-modifier 'control) ; make Control key do Control
 (setq ns-function-modifier 'hyper)  ; make Fn key do Hyper
+
+(when (string-equal system-type "darwin")
+  ;; delete files by moving them to the trash
+  (setq delete-by-moving-to-trash t)
+  (setq trash-directory "~/.Trash")
+
+  ;; Don't make new frames when opening a new file with Emacs
+  (setq ns-pop-up-frames nil)
+
+  ;; set the Fn key as the hyper key
+  (setq ns-function-modifier 'hyper)
+
+  ;; Use Command-` to switch between Emacs windows (not frames)
+  (bind-key "s-`" 'other-window)
+  
+  ;; Use Command-Shift-` to switch Emacs frames in reverse
+  (bind-key "s-~" (lambda() () (interactive) (other-window -1)))
+
+  ;; Because of the keybindings above, set one for `other-frame'
+  (bind-key "s-1" 'other-frame)
+
+  ;; Fullscreen!
+  (setq ns-use-native-fullscreen nil) ; Not Lion style
+  (bind-key "<s-return>" 'toggle-frame-fullscreen)
+
+  ;; buffer switching
+  (bind-key "s-{" 'previous-buffer)
+  (bind-key "s-}" 'next-buffer)
+
+  ;; Compiling
+  (bind-key "H-c" 'compile)
+  (bind-key "H-r" 'recompile)
+  (bind-key "H-s" (defun save-and-recompile () (interactive) (save-buffer) (recompile)))
+
+  ;; disable the key that minimizes emacs to the dock because I don't
+  ;; minimize my windows
+  ;; (global-unset-key (kbd "C-z"))
+
+  ;; Not going to use these commands
+  (put 'ns-print-buffer 'disabled t)
+  (put 'suspend-frame 'disabled t))
+#+end_src
+
+~exec-path-from-shell~ makes the command-line path with Emacs's shell
+match the same one on macOS.
+
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :if (memq window-system '(mac ns))
+  :ensure t
+  :init
+  (exec-path-from-shell-initialize))
+#+end_src
+
+** Open other apps from Emacs
+
+#+BEGIN_SRC emacs-lisp
+(defun open-dir-in-finder ()
+  "Open a new Finder window to the path of the current buffer"
+  (interactive)
+  (start-process "mai-open-dir-process" nil "open" "."))
+
+(defun open-dir-in-iterm ()
+  "Open the current directory of the buffer in iTerm."
+  (interactive)
+  (let* ((iterm-app-path "/Applications/iTerm.app")
+         (iterm-brew-path "/opt/homebrew-cask/Caskroom/iterm2/1.0.0/iTerm.app")
+         (iterm-path (if (file-directory-p iterm-app-path)
+                         iterm-app-path
+                       iterm-brew-path)))
+    (start-process "mai-open-dir-process" nil "open" "-a" iterm-path ".")))
+
+(bind-key "C-c o f" 'open-dir-in-finder)
+(bind-key "C-c o t" 'open-dir-in-iterm)
 #+END_SRC
+
+* List buffers
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+ibuffer is the improved version of list-buffers.
+
+#+begin_src emacs-lisp
+;; make ibuffer the default buffer lister.
+(defalias 'list-buffers 'ibuffer)
+#+end_src
+
+source: http://ergoemacs.org/emacs/emacs_buffer_management.html
+
+#+begin_src emacs-lisp
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+
+;; Also auto refresh dired, but be quiet about it
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
+#+end_src
+
+source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]
+
+* Helm
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+#+begin_src emacs-lisp
+(use-package helm
+  :ensure t
+  :diminish helm-mode
+  :init (progn
+          (require 'helm-config)
+          (use-package helm-projectile
+            :ensure t
+            :commands helm-projectile
+            :bind ("C-c p h" . helm-projectile))
+          (use-package helm-ag :defer 10  :ensure t)
+          (setq helm-locate-command "mdfind -interpret -name %s %s"
+                helm-ff-newfile-prompt-p nil
+                helm-M-x-fuzzy-match t)
+          (helm-mode)
+          (use-package helm-swoop
+            :ensure t
+            :bind ("H-w" . helm-swoop)))
+  :bind (("C-c h" . helm-command-prefix)
+         ("C-x b" . helm-mini)
+         ("C-`" . helm-resume)
+         ("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)))
+#+end_src
+* Scratch
+
+Convenient package to create =*scratch*= buffers that are based on the
+current buffer's major mode. This is more convienent than manually
+creating a buffer to do some scratch work or reusing the initial
+=*scratch*= buffer.
+
+#+begin_src emacs-lisp
+(use-package scratch
+  :ensure t
+  :commands scratch)
+#+end_src
+* Yasnippet
+
+Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
+and have also modified them and added my own.
+
+It takes a few seconds to load and I don't need them immediately when
+Emacs starts up, so we can defer loading yasnippet until there's some
+idle time.
+
+Setting =yas-indent-line= to ='fixed= fixes Python indentation
+behavior when typing a templated snippet.
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :diminish yas-minor-mode
+  :config
+  (setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
+  (setq yas-indent-line 'fixed)
+  (yas-global-mode))
+#+end_src
+* Recentf
+
+#+begin_src emacs-lisp
+(use-package recentf
+  :bind ("C-x C-r" . helm-recentf)
+  :config
+  (recentf-mode t)
+  (setq recentf-max-saved-items 200))
+#+end_src
+
 * which key
   Brings up some help
   #+BEGIN_SRC emacs-lisp
@@ -256,55 +658,6 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
        (global-auto-complete-mode t)
       ))
   #+END_SRC
-* Themes and modeline
-  #+BEGIN_SRC emacs-lisp
-
-        (use-package color-theme-modern
-          :ensure t)
-
-        ;(use-package zenburn-theme
-        ;  :ensure t
-        ;  :config (load-theme 'zenburn t))
-
-        ;(use-package spacemacs-theme
-        ;  :ensure t
-        ;  ;:init
-        ;  ;(load-theme 'spacemacs-dark t)
-        ;  )
-        (use-package base16-theme
-        :ensure t
-        )
-        (use-package moe-theme
-        :ensure t)
-
-
-        (use-package alect-themes
-        :ensure t)
-
-        ;(use-package zerodark-theme
-        ;:ensure t)
-
-        ;;(load-theme 'zerodark t)
-        ;;(zerodark-setup-modeline-format)
-
-  #+END_SRC
-
-* Reveal.js
-  #+BEGIN_SRC emacs-lisp
-  (use-package ox-reveal
-  :ensure t
-  :config
-    (require 'ox-reveal)
-    (setq org-reveal-root "http://cdn.jsdelivr.net/reveal.js/3.0.0/")
-    (setq org-reveal-mathjax t)
-)
-    (use-package htmlize
-    :ensure t)
-  #+END_SRC
-
-  #+RESULTS:
-  : t
-
 * Flycheck
   #+BEGIN_SRC emacs-lisp
     (use-package flycheck
@@ -329,18 +682,6 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
   #+RESULTS:
   : t
-* Yasnippet
-  #+BEGIN_SRC emacs-lisp
-    (use-package yasnippet
-      :ensure t
-      :init
-        (yas-global-mode 1))
-
-    (use-package yasnippet-snippets
-      :ensure t)
-  #+END_SRC
-
-  #+RESULTS:
 * Undo Tree
   #+BEGIN_SRC emacs-lisp
     (use-package undo-tree
@@ -390,278 +731,6 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
   #+END_SRC
 
-* iedit and narrow / widen dwim
-
-  #+BEGIN_SRC emacs-lisp
-  ; mark and edit all copies of the marked region simultaniously.
-  (use-package iedit
-  :ensure t)
-
-  ; if you're windened, narrow to the region, if you're narrowed, widen
-  ; bound to C-x n
-  (defun narrow-or-widen-dwim (p)
-  "If the buffer is narrowed, it widens. Otherwise, it narrows intelligently.
-  Intelligently means: region, org-src-block, org-subtree, or defun,
-  whichever applies first.
-  Narrowing to org-src-block actually calls `org-edit-src-code'.
-
-  With prefix P, don't widen, just narrow even if buffer is already
-  narrowed."
-  (interactive "P")
-  (declare (interactive-only))
-  (cond ((and (buffer-narrowed-p) (not p)) (widen))
-  ((region-active-p)
-  (narrow-to-region (region-beginning) (region-end)))
-  ((derived-mode-p 'org-mode)
-  ;; `org-edit-src-code' is not a real narrowing command.
-  ;; Remove this first conditional if you don't want it.
-  (cond ((ignore-errors (org-edit-src-code))
-  (delete-other-windows))
-  ((org-at-block-p)
-  (org-narrow-to-block))
-  (t (org-narrow-to-subtree))))
-  (t (narrow-to-defun))))
-
-  ;; (define-key endless/toggle-map "n" #'narrow-or-widen-dwim)
-  ;; This line actually replaces Emacs' entire narrowing keymap, that's
-  ;; how much I like this command. Only copy it if that's what you want.
-  (define-key ctl-x-map "n" #'narrow-or-widen-dwim)
-
-  #+END_SRC
-
-
-  #+RESULTS:
-  : narrow-or-widen-dwim
-
-* Web Mode
-#+BEGIN_SRC emacs-lisp
-    (use-package web-mode
-      :ensure t
-      :config
-	   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-	   (add-to-list 'auto-mode-alist '("\\.vue?\\'" . web-mode))
-	   (setq web-mode-engines-alist
-		 '(("django"    . "\\.html\\'")))
-	   (setq web-mode-ac-sources-alist
-	   '(("css" . (ac-source-css-property))
-	   ("vue" . (ac-source-words-in-buffer ac-source-abbrev))
-           ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
-  (setq web-mode-enable-auto-closing t))
-  (setq web-mode-enable-auto-quoting t) ; this fixes the quote problem I mentioned
-
-
-#+END_SRC
-
-#+RESULTS:
-: t
-* Emmet mode
-#+BEGIN_SRC emacs-lisp
-(use-package emmet-mode
-:ensure t
-:config
-(add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
-(add-hook 'web-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
-(add-hook 'css-mode-hook  'emmet-mode) ;; enable Emmet's css abbreviation.
-)
-#+END_SRC
-* Javascript
-#+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-:ensure t
-:ensure ac-js2
-:init
-(progn
-(add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js2-mode-hook 'ac-js2-mode)
-))
-
-(use-package js2-refactor
-:ensure t
-:config
-(progn
-(js2r-add-keybindings-with-prefix "C-c C-m")
-;; eg. extract function with `C-c C-m ef`.
-(add-hook 'js2-mode-hook #'js2-refactor-mode)))
-(use-package tern
-:ensure tern
-:ensure tern-auto-complete
-:config
-(progn
-(add-hook 'js-mode-hook (lambda () (tern-mode t)))
-(add-hook 'js2-mode-hook (lambda () (tern-mode t)))
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-;;(tern-ac-setup)
-))
-
-;;(use-package jade
-;;:ensure t
-;;)
-
-;; use web-mode for .jsx files
-(add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
-
-
-;; turn on flychecking globally
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
-;; disable jshint since we prefer eslint checking
-(setq-default flycheck-disabled-checkers
-  (append flycheck-disabled-checkers
-    '(javascript-jshint)))
-
-;; use eslint with web-mode for jsx files
-(flycheck-add-mode 'javascript-eslint 'web-mode)
-
-;; customize flycheck temp file prefix
-(setq-default flycheck-temp-prefix ".flycheck")
-
-;; disable json-jsonlist checking for json files
-(setq-default flycheck-disabled-checkers
-  (append flycheck-disabled-checkers
-    '(json-jsonlist)))
-
-;; adjust indents for web-mode to 2 spaces
-(defun my-web-mode-hook ()
-  "Hooks for Web mode. Adjust indents"
-  ;;; http://web-mode.org/
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2))
-(add-hook 'web-mode-hook  'my-web-mode-hook)
-#+END_SRC
-
-* DIRED
-#+BEGIN_SRC emacs-lisp
-; wiki melpa problem
-;(use-package dired+
-;  :ensure t
-;  :config (require 'dired+)
-;  )
-
-
-#+END_SRC
-
-#+RESULTS:
-: t
-
-* Stuff to refile as I do more Screencasts
-#+BEGIN_SRC emacs-lisp
-
-    ;;--------------------------------------------------------------------------
-    ;; latex
-    (use-package tex
-    :ensure auctex)
-
-    (defun tex-view ()
-        (interactive)
-        (tex-send-command "evince" (tex-append tex-print-file ".pdf")))
-  ;; babel stuff
-
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((python . t)
-       (emacs-lisp . t)
-       (C . t)
-    (js . t)
-       (ditaa . t)
-       (dot . t)
-       (org . t)
-           (shell . t )
-    (latex . t )
-       ))
-  ;; projectile
-    (use-package projectile
-      :ensure t
-      :config
-      (projectile-global-mode)
-    (setq projectile-completion-system 'ivy))
-
-    ;; (use-package counsel-projectile
-    ;;   :ensure t
-    ;;   :config
-    ;;   (counsel-projectile-on)q)
-
-    (use-package smartparens
-    :ensure t
-    :config
-    (use-package smartparens-config)
-    (use-package smartparens-html)
-    (use-package smartparens-python)
-    (use-package smartparens-latex)
-    (smartparens-global-mode t)
-    (show-smartparens-global-mode t)
-    :bind
-    ( ("C-<down>" . sp-down-sexp)
-     ("C-<up>"   . sp-up-sexp)
-     ("M-<down>" . sp-backward-down-sexp)
-     ("M-<up>"   . sp-backward-up-sexp)
-    ("C-M-a" . sp-beginning-of-sexp)
-     ("C-M-e" . sp-end-of-sexp)
-
-
-
-     ("C-M-f" . sp-forward-sexp)
-     ("C-M-b" . sp-backward-sexp)
-
-     ("C-M-n" . sp-next-sexp)
-     ("C-M-p" . sp-previous-sexp)
-
-     ("C-S-f" . sp-forward-symbol)
-     ("C-S-b" . sp-backward-symbol)
-
-     ("C-<right>" . sp-forward-slurp-sexp)
-     ("M-<right>" . sp-forward-barf-sexp)
-     ("C-<left>"  . sp-backward-slurp-sexp)
-     ("M-<left>"  . sp-backward-barf-sexp)
-
-     ("C-M-t" . sp-transpose-sexp)
-     ("C-M-k" . sp-kill-sexp)
-     ("C-k"   . sp-kill-hybrid-sexp)
-     ("M-k"   . sp-backward-kill-sexp)
-     ("C-M-w" . sp-copy-sexp)
-
-     ("C-M-d" . delete-sexp)
-
-     ("M-<backspace>" . backward-kill-word)
-     ("C-<backspace>" . sp-backward-kill-word)
-     ([remap sp-backward-kill-word] . backward-kill-word)
-
-     ("M-[" . sp-backward-unwrap-sexp)
-     ("M-]" . sp-unwrap-sexp)
-
-     ("C-x C-t" . sp-transpose-hybrid-sexp)
-
-     ("C-c ("  . wrap-with-parens)
-     ("C-c ["  . wrap-with-brackets)
-     ("C-c {"  . wrap-with-braces)
-     ("C-c '"  . wrap-with-single-quotes)
-     ("C-c \"" . wrap-with-double-quotes)
-     ("C-c _"  . wrap-with-underscores)
-    ("C-c `"  . wrap-with-back-quotes)
-    ))
-
-    ;;--------------------------------------------
-
-
-
-
-    ;; font scaling
-    (use-package default-text-scale
-      :ensure t
-     :config
-      (global-set-key (kbd "C-M-=") 'default-text-scale-increase)
-      (global-set-key (kbd "C-M--") 'default-text-scale-decrease))
-
-
-    ;; (use-package frame-cmds :ensure t)
-    ;; (load-file "/home/zamansky/Dropbox/shared/zoom-frm.el")
-    ;; (define-key ctl-x-map [(control ?+)] 'zoom-in/out)
-    ;; (define-key ctl-x-map [(control ?-)] 'zoom-in/out)
-    ;; (define-key ctl-x-map [(control ?=)] 'zoom-in/out)
-    (define-key ctl-x-map [(control ?0)] 'zoom-in/out)
-
-
-#+END_SRC
 * Hydra
 #+BEGIN_SRC emacs-lisp
   (use-package hydra
@@ -789,571 +858,10 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
 
 #+END_SRC
-* Load other files
-   #+BEGIN_SRC emacs-lisp
-     (defun load-if-exists (f)
-       "load the elisp file only if it exists and is readable"
-       (if (file-readable-p f)
-           (load-file f)))
-
-     (load-if-exists "~/Dropbox/shared/mu4econfig.el")
-     (load-if-exists "~/Dropbox/shared/not-for-github.el")
-
-   #+END_SRC
-
-   #+RESULTS:
-   : t
 * Testing Stuff
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'turn-on-flyspell)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
-(add-hook 'mu4e-compose-mode-hook 'turn-on-flyspell)
-(add-hook 'mu4e-compose-mode-hook 'turn-on-auto-fill)
-
-#+END_SRC
-* Better Shell
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package better-shell
-      :ensure t
-      :bind (("C-\"" . better-shell-shell)
-             ("C-:" . better-shell-remote-open)))
 #+END_SRC
 
-#+RESULTS:
-: better-shell-remote-open
 
-* eshell stuff
-#+BEGIN_SRC emacs-lisp
-
-  (use-package shell-switcher
-    :ensure t
-    :config
-    (setq shell-switcher-mode t)
-    :bind (("C-'" . shell-switcher-switch-buffer)
-	   ("C-x 4 '" . shell-switcher-switch-buffer-other-window)
-	   ("C-M-'" . shell-switcher-new-shell)))
-
-
-  ;; Visual commands
-  (setq eshell-visual-commands '("vi" "screen" "top" "less" "more" "lynx"
-				 "ncftp" "pine" "tin" "trn" "elm" "vim"
-				 "nmtui" "alsamixer" "htop" "el" "elinks"
-				 ))
-                                 (setq eshell-visual-subcommands '(("git" "log" "diff" "show")))
-  (setq eshell-list-files-after-cd t)
-  (defun eshell-clear-buffer ()
-    "Clear terminal"
-    (interactive)
-    (let ((inhibit-read-only t))
-      (erase-buffer)
-      (eshell-send-input)))
-  (add-hook 'eshell-mode-hook
-	    '(lambda()
-	       (local-set-key (kbd "C-l") 'eshell-clear-buffer)))
-
-  (defun eshell/magit ()
-    "Function to open magit-status for the current directory"
-    (interactive)
-    (magit-status default-directory)
-    nil)
-
- ;; smart display stuff
-(require 'eshell)
-(require 'em-smart)
-(setq eshell-where-to-jump 'begin)
-(setq eshell-review-quick-commands nil)
-(setq eshell-smart-space-goes-to-end t)
-
-(add-hook 'eshell-mode-hook
-  (lambda ()
-    (eshell-smart-initialize)))
-;; eshell here
-(defun eshell-here ()
-  "Opens up a new shell in the directory associated with the
-current buffer's file. The eshell is renamed to match that
-directory to make multiple eshell windows easier."
-  (interactive)
-  (let* ((parent (if (buffer-file-name)
-                     (file-name-directory (buffer-file-name))
-                   default-directory))
-         (height (/ (window-total-height) 3))
-         (name   (car (last (split-string parent "/" t)))))
-    (split-window-vertically (- height))
-    (other-window 1)
-    (eshell "new")
-    (rename-buffer (concat "*eshell: " name "*"))
-
-    (insert (concat "ls"))
-    (eshell-send-input)))
-
-(global-set-key (kbd "C-!") 'eshell-here)
-
-#+END_SRC
-
-Eshell prompt
-#+BEGIN_SRC emacs-lisp
- (defcustom dotemacs-eshell/prompt-git-info
-  t
-  "Turns on additional git information in the prompt."
-  :group 'dotemacs-eshell
-  :type 'boolean)
-
-;; (epe-colorize-with-face "abc" 'font-lock-comment-face)
-(defmacro epe-colorize-with-face (str face)
-  `(propertize ,str 'face ,face))
-
-(defface epe-venv-face
-  '((t (:inherit font-lock-comment-face)))
-  "Face of python virtual environment info in prompt."
-  :group 'epe)
-
-  (setq eshell-prompt-function
-      (lambda ()
-        (concat (propertize (abbreviate-file-name (eshell/pwd)) 'face 'eshell-prompt)
-                (when (and dotemacs-eshell/prompt-git-info
-                           (fboundp #'vc-git-branches))
-                  (let ((branch (car (vc-git-branches))))
-                    (when branch
-                      (concat
-                       (propertize " [" 'face 'font-lock-keyword-face)
-                       (propertize branch 'face 'font-lock-function-name-face)
-                       (let* ((status (shell-command-to-string "git status --porcelain"))
-                              (parts (split-string status "\n" t " "))
-                              (states (mapcar #'string-to-char parts))
-                              (added (count-if (lambda (char) (= char ?A)) states))
-                              (modified (count-if (lambda (char) (= char ?M)) states))
-                              (deleted (count-if (lambda (char) (= char ?D)) states)))
-                         (when (> (+ added modified deleted) 0)
-                           (propertize (format " +%d ~%d -%d" added modified deleted) 'face 'font-lock-comment-face)))
-                       (propertize "]" 'face 'font-lock-keyword-face)))))
-                (when (and (boundp #'venv-current-name) venv-current-name)
-                  (concat
-                    (epe-colorize-with-face " [" 'epe-venv-face)
-                    (propertize venv-current-name 'face `(:foreground "#2E8B57" :slant italic))
-                    (epe-colorize-with-face "]" 'epe-venv-face)))
-                (propertize " $ " 'face 'font-lock-constant-face))))
-#+END_SRC
-#+RESULTS:
-: t
-* Elfeed
-#+BEGIN_SRC emacs-lisp :tangle no
-
-    (setq elfeed-db-directory "~/Dropbox/shared/elfeeddb")
-
-
-    (defun elfeed-mark-all-as-read ()
-	  (interactive)
-	  (mark-whole-buffer)
-	  (elfeed-search-untag-all-unread))
-
-
-    ;;functions to support syncing .elfeed between machines
-    ;;makes sure elfeed reads index from disk before launching
-    (defun bjm/elfeed-load-db-and-open ()
-      "Wrapper to load the elfeed db from disk before opening"
-      (interactive)
-      (elfeed-db-load)
-      (elfeed)
-      (elfeed-search-update--force))
-
-    ;;write to disk when quiting
-    (defun bjm/elfeed-save-db-and-bury ()
-      "Wrapper to save the elfeed db to disk before burying buffer"
-      (interactive)
-      (elfeed-db-save)
-      (quit-window))
-
-
-
-
-    (use-package elfeed
-      :ensure t
-      :bind (:map elfeed-search-mode-map
-		  ("q" . bjm/elfeed-save-db-and-bury)
-		  ("Q" . bjm/elfeed-save-db-and-bury)
-		  ("m" . elfeed-toggle-star)
-		  ("M" . elfeed-toggle-star)
-		  ("j" . mz/make-and-run-elfeed-hydra)
-		  ("J" . mz/make-and-run-elfeed-hydra)
-		  )
-:config
-    (defalias 'elfeed-toggle-star
-      (elfeed-expose #'elfeed-search-toggle-all 'star))
-
-      )
-
-    (use-package elfeed-goodies
-      :ensure t
-      :config
-      (elfeed-goodies/setup))
-
-
-    (use-package elfeed-org
-      :ensure t
-      :config
-      (elfeed-org)
-      (setq rmh-elfeed-org-files (list "~/Dropbox/shared/elfeed.org")))
-
-
-
-
-
-  (defun z/hasCap (s) ""
-	 (let ((case-fold-search nil))
-	 (string-match-p "[[:upper:]]" s)
-	 ))
-
-
-  (defun z/get-hydra-option-key (s)
-    "returns single upper case letter (converted to lower) or first"
-    (interactive)
-    (let ( (loc (z/hasCap s)))
-      (if loc
-	  (downcase (substring s loc (+ loc 1)))
-	(substring s 0 1)
-      )))
-
-  ;;  (active blogs cs eDucation emacs local misc sports star tech unread webcomics)
-  (defun mz/make-elfeed-cats (tags)
-    "Returns a list of lists. Each one is line for the hydra configuratio in the form
-       (c function hint)"
-    (interactive)
-    (mapcar (lambda (tag)
-	      (let* (
-		     (tagstring (symbol-name tag))
-		     (c (z/get-hydra-option-key tagstring))
-		     )
-		(list c (append '(elfeed-search-set-filter) (list (format "@6-months-ago +%s" tagstring) ))tagstring  )))
-	    tags))
-
-
-
-
-
-  (defmacro mz/make-elfeed-hydra ()
-    `(defhydra mz/hydra-elfeed ()
-       "filter"
-       ,@(mz/make-elfeed-cats (elfeed-db-get-all-tags))
-       ("*" (elfeed-search-set-filter "@6-months-ago +star") "Starred")
-       ("M" elfeed-toggle-star "Mark")
-       ("A" (elfeed-search-set-filter "@6-months-ago") "All")
-       ("T" (elfeed-search-set-filter "@1-day-ago") "Today")
-       ("Q" bjm/elfeed-save-db-and-bury "Quit Elfeed" :color blue)
-       ("q" nil "quit" :color blue)
-       ))
-
-
-
-
-    (defun mz/make-and-run-elfeed-hydra ()
-      ""
-      (interactive)
-      (mz/make-elfeed-hydra)
-      (mz/hydra-elfeed/body))
-
-
-#+END_SRC
-
-#+RESULTS:
-: mz/make-and-run-elfeed-hydra
-
-* c++
-#+BEGIN_SRC emacs-lisp
-(use-package ggtags
-:ensure t
-:config
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-              (ggtags-mode 1))))
-)
-
-#+END_SRC
-
-#+RESULTS:
-
-* Clojure
-#+BEGIN_SRC emacs-lisp
-(use-package cider
-:ensure t)
-
-
-#+END_SRC
-* Dumb jump
-#+BEGIN_SRC emacs-lisp
-
-(use-package dumb-jump
-  :bind (("M-g o" . dumb-jump-go-other-window)
-         ("M-g j" . dumb-jump-go)
-         ("M-g x" . dumb-jump-go-prefer-external)
-         ("M-g z" . dumb-jump-go-prefer-external-other-window))
-  :config
-  ;; (setq dumb-jump-selector 'ivy) ;; (setq dumb-jump-selector 'helm)
-:init
-(dumb-jump-mode)
-  :ensure
-)
-
-
-
-#+END_SRC
-* Origami folding
-#+BEGIN_SRC emacs-lisp
-(use-package origami
-:ensure t)
-#+END_SRC
-
-#+RESULTS:
-
-* IBUFFER
-#+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-x C-b") 'ibuffer)
-  (setq ibuffer-saved-filter-groups
-	(quote (("default"
-		 ("dired" (mode . dired-mode))
-		 ("org" (name . "^.*org$"))
-	       ("IRC" (or (mode . circe-channel-mode) (mode . circe-server-mode)))
-		 ("web" (or (mode . web-mode) (mode . js2-mode)))
-		 ("shell" (or (mode . eshell-mode) (mode . shell-mode)))
-		 ("mu4e" (or
-
-                 (mode . mu4e-compose-mode)
-                 (name . "\*mu4e\*")
-                 ))
-		 ("programming" (or
-				 (mode . python-mode)
-				 (mode . c++-mode)))
-		 ("emacs" (or
-			   (name . "^\\*scratch\\*$")
-			   (name . "^\\*Messages\\*$")))
-		 ))))
-  (add-hook 'ibuffer-mode-hook
-	    (lambda ()
-	      (ibuffer-auto-mode 1)
-	      (ibuffer-switch-to-saved-filter-groups "default")))
-
-  ;; don't show these
-					  ;(add-to-list 'ibuffer-never-show-predicates "zowie")
-  ;; Don't show filter groups if there are no buffers in that group
-  (setq ibuffer-show-empty-filter-groups nil)
-
-  ;; Don't ask for confirmation to delete marked buffers
-  (setq ibuffer-expert t)
-
-#+END_SRC
-* Prodigy
-#+BEGIN_SRC emacs-lisp
-    (use-package prodigy
-    :ensure t
-    :config
-    (load-if-exists "~/Dropbox/shared/prodigy-services.el")
-)
-#+END_SRC
-
-#+RESULTS:
-: t
-
-* Treemacs
-#+BEGIN_SRC emacs-lisp
-  (use-package treemacs
-    :ensure t
-    :defer t
-    :config
-    (progn
-
-      (setq treemacs-follow-after-init          t
-            treemacs-width                      35
-            treemacs-indentation                2
-            treemacs-git-integration            t
-            treemacs-collapse-dirs              3
-            treemacs-silent-refresh             nil
-            treemacs-change-root-without-asking nil
-            treemacs-sorting                    'alphabetic-desc
-            treemacs-show-hidden-files          t
-            treemacs-never-persist              nil
-            treemacs-is-never-other-window      nil
-            treemacs-goto-tag-strategy          'refetch-index)
-
-      (treemacs-follow-mode t)
-      (treemacs-filewatch-mode t))
-    :bind
-    (:map global-map
-          ([f8]        . treemacs-toggle)
-          ([f9]        . treemacs-projectile-toggle)
-          ("<C-M-tab>" . treemacs-toggle)
-          ("M-0"       . treemacs-select-window)
-          ("C-c 1"     . treemacs-delete-other-windows)
-        ))
-  (use-package treemacs-projectile
-    :defer t
-    :ensure t
-    :config
-    (setq treemacs-header-function #'treemacs-projectile-create-header)
-)
-
-#+END_SRC
-
-#+RESULTS:
-
-* misc
-#+BEGIN_SRC emacs-lisp
-(defun z/nikola-deploy () ""
-(interactive)
-(venv-with-virtualenv "blog" (shell-command "cd ~/gh/cestlaz.github.io; nikola github_deploy"))
-)
-
-(defun z/swap-windows ()
-""
-(interactive)
-(ace-swap-window)
-(aw-flip-window)
-)
-
-#+END_SRC
-
-#+RESULTS:
-: z/nikola-deploy
-* Haskell
-#+BEGIN_SRC emacs-lisp
-(use-package haskell-mode
-:ensure t
-:config
-(require 'haskell-interactive-mode)
-(require 'haskell-process)
-(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
-
-)
-
-#+END_SRC
-* personal keymap
-#+BEGIN_SRC emacs-lisp
-;; unset C- and M- digit keys
-;(dotimes (n 10)
-;  (global-unset-key (kbd (format "C-%d" n)))
-;  (global-unset-key (kbd (format "M-%d" n)))
-;  )
-
-
-(defun org-agenda-show-agenda-and-todo (&optional arg)
-  (interactive "P")
-  (org-agenda arg "c")
-  (org-agenda-fortnight-view))
-
-
-;; set up my own map
-(define-prefix-command 'z-map)
-(global-set-key (kbd "C-z") 'z-map) ;; was C-1
-(define-key z-map (kbd "c") 'multiple-cursors-hydra/body)
-(define-key z-map (kbd "m") 'mu4e)
-(define-key z-map (kbd "1") 'org-global-cycle)
-(define-key z-map (kbd "a") 'org-agenda-show-agenda-and-todo)
-(define-key z-map (kbd "g") 'counsel-ag)
-
-(define-key z-map (kbd "s") 'flyspell-correct-word-before-point)
-(define-key z-map (kbd "i") (lambda () (interactive) (find-file "~/Dropbox/orgfiles/i.org")))
-(define-key z-map (kbd "f") 'origami-toggle-node)
-(define-key z-map (kbd "w") 'z/swap-windows)
-
-
-  (setq user-full-name "Mike Zamansky"
-                          user-mail-address "mz631@hunter.cuny.edu")
-  ;;--------------------------------------------------------------------------
-
-
-  (global-set-key (kbd "\e\ei")
-                  (lambda () (interactive) (find-file "~/Dropbox/orgfiles/i.org")))
-
-  (global-set-key (kbd "\e\el")
-                  (lambda () (interactive) (find-file "~/Dropbox/orgfiles/links.org")))
-
-  (global-set-key (kbd "\e\ec")
-                  (lambda () (interactive) (find-file "~/.emacs.d/myinit.org")))
-
-(global-set-key (kbd "<end>") 'move-end-of-line)
-
-(global-set-key [mouse-3] 'flyspell-correct-word-before-point)
-
-#+END_SRC
-
-#+RESULTS:
-: origami-toggle-node
-
-#  LocalWords:  DIRED Javascript Screencasts Autocomplete
-* shell-pop
-#+BEGIN_SRC emacs-lisp
-(use-package shell-pop
-:ensure t
-  :bind (("s-t" . shell-pop))
-  :config
-  (setq shell-pop-shell-type (quote ("ehell" "eshell" (lambda nil (eshell)))))
-  (setq shell-pop-term-shell "eshell")
-  ;; need to do this manually or not picked up by `shell-pop'
-  (shell-pop--set-shell-type 'shell-pop-shell-type shell-pop-shell-type))
-
-
-#+END_SRC
-* Wgrep
-#+BEGIN_SRC emacs-lisp
-(use-package wgrep
-:ensure t
-)
-(use-package wgrep-ag
-:ensure t
-)
-(require 'wgrep-ag)
-#+END_SRC
-
-#+RESULTS:
-* Silversearcher
-#+BEGIN_SRC emacs-lisp
-(use-package ag
-:ensure t)
-
-#+END_SRC
-* Regex
-#+BEGIN_SRC emacs-lisp
-(use-package pcre2el
-:ensure t
-:config
-(pcre-mode)
-)
-#+END_SRC
-* Music
-#+BEGIN_SRC emacs-lisp
-(use-package simple-mpc
-:ensure t)
-(use-package mingus
-:ensure t)
-
-#+END_SRC
-* Atomic Chrome (edit in emacs)
-#+BEGIN_SRC emacs-lisp
-(use-package atomic-chrome
-:ensure t
-:config (atomic-chrome-start-server))
-(setq atomic-chrome-buffer-open-style 'frame)
-#+END_SRC
-* PDF tools
-#+BEGIN_SRC emacs-lisp
-(use-package pdf-tools
-:ensure t)
-(use-package org-pdfview
-:ensure t)
-
-(require 'pdf-tools)
-(require 'org-pdfview)
-
-#+END_SRC
-* auto-yasnippet
-#+BEGIN_SRC emacs-lisp
-(use-package auto-yasnippet
-:ensure t)
-#+END_SRC
-* Misc
-#+BEGIN_SRC emacs-lisp
-(setq browse-url-browser-function 'browse-url-generic
-      browse-url-generic-program "google-chrome-stable")
-
-(setq auto-window-vscroll nil)
-
-#+END_SRC

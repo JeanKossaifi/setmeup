@@ -51,3 +51,4 @@ recentf
 .cache/
 projectile-bookmarks.eld
 myinit.el
+smex-items
