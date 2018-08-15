@@ -38,7 +38,21 @@ customize settings in [[file:init.el][init.el]].
 #+end_src
 
 * Theme
-*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[https://github.com/sandhu/emacs.d/blob/master/config/008-ui-config.el][Sandhu's emacs config]]
+
+** Solarized theme
+
+#+begin_src emacs-lisp
+(use-package solarized-theme :ensure t
+  :init (progn
+          (setq solarized-high-contrast-mode-line t
+                solarized-use-less-bold t
+                solarized-emphasize-indicators nil
+                solarized-scale-org-headlines nil
+                x-underline-at-descent-line t)
+          (load-theme 'solarized-light 'no-confirm))
+  :config (setq color-theme-is-global t))
+#+end_src
 
 ** Cyberpunk theme
 
@@ -64,17 +78,6 @@ depending on the time of day or my mood. Normally, switching themes is
 a multi-step process with ~disable-theme~ and ~load-theme~. The
 ~switch-theme~ function will do that in one swoop. I just choose which
 theme I want to go to.
-** Solarized theme
-
-Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
-
-#+begin_src emacs-lisp
-(use-package solarized-theme
-  :defer 10
-  :init
-  (setq solarized-use-variable-pitch nil)
-  :ensure t)
-#+end_src
 
 ** Monokai theme
 
@@ -140,12 +143,12 @@ And here's how we tell Emacs to use the font we want to use.
 
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist
-             '(font . "Source Code Pro-28"))
+             '(font . "Source Code Pro-22"))
 #+end_src
 
 We can set the default font size:
 #+BEGIN_SRC emacs-lisp
-(set-frame-font "Source Code Pro-28")
+(set-frame-font "Source Code Pro-22")
 #+END_SRC
 
 Note: To view all fonts that are available to use, run the following:
@@ -858,10 +861,73 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
 
 
 #+END_SRC
+* powerline
+*Source:* [[https://github.com/sandhu/emacs.d/blob/master/config/008-ui-config.el][Sandhu's emacs config]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package powerline :ensure t
+  :init (setq powerline-default-separator 'wave)
+  :config (progn
+            (require 'powerline)
+            (add-hook 'desktop-after-read-hook 'powerline-reset)
+            (defface modes-ml-face '((t (:background "#002b36" :inherit mode-line)))
+              "Powerline face for modes section of the mode-line"
+              :group 'powerline)
+            (defface file-ml-face '((t (:background "#586e75" :inherit mode-line)))
+              "Powerline face for file and branch section of the mode-line"
+              :group 'powerline)
+            (defface line-ml-face '((t (:background "#93a1a1" :inherit mode-line)))
+              "Powerline face for line number section of the mode-line"
+              :group 'powerline)
+            (defface pos-ml-face '((t (:background "#586e75" :inherit mode-line)))
+              "Powerline face for file position section of the mode-line"
+              :group 'powerline)
+            (defface ml-fill-face '((t (:background "#93a1a1" :inherit mode-line)))
+              "Powerline face used to fill the unused portion of the mode-line"
+              :group 'powerline)
+            (setq-default mode-line-format
+                          '("%e"
+                            (:eval
+                             (let* ((file-name (buffer-file-name (current-buffer)))
+                                    (active (powerline-selected-window-active))
+                                    (separator-left (intern (format "powerline-%s-%s"
+                                                                    (powerline-current-separator)
+                                                                    (car powerline-default-separator-dir))))
+                                    (separator-right (intern (format "powerline-%s-%s"
+                                                                     (powerline-current-separator)
+                                                                     (cdr powerline-default-separator-dir))))
+                                    (lhs (list (powerline-major-mode 'modes-ml-face 'l)
+                                               (powerline-process 'modes-ml-face 'l)
+                                               (powerline-minor-modes 'modes-ml-face 'l)
+                                               (powerline-raw " " 'modes-ml-face)
+                                               (funcall separator-left 'modes-ml-face 'file-ml-face)
+
+                                               (powerline-raw "[" 'file-ml-face)
+                                               (powerline-raw (projectile-project-name) 'file-ml-face)
+                                               (powerline-raw "] %b %*" 'file-ml-face)
+                                               (powerline-raw (concat " "
+                                                                      (when (and file-name vc-mode)
+                                                                        (concat "(" (-> file-name
+                                                                                        vc-working-revision
+                                                                                        (string-utils-truncate-to 40))
+                                                                                ")")))
+                                                              'file-ml-face 'r)
+                                               (funcall separator-left 'file-ml-face 'ml-fill-face)))
+
+                                    (rhs (list (powerline-raw global-mode-string 'ml-fill-face 'r)
+                                               (funcall separator-right 'ml-fill-face 'pos-ml-face)
+                                               (powerline-raw "%p " 'pos-ml-face 'l)
+                                               (funcall separator-right 'pos-ml-face 'line-ml-face)
+
+                                               (powerline-raw " %4l " 'line-ml-face 'r))))
+
+                               (concat (powerline-render lhs)
+                                       (powerline-fill 'ml-fill-face (powerline-width rhs))
+                                       (powerline-render rhs))))))))
+#+END_SRC
 * Testing Stuff
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'turn-on-flyspell)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 #+END_SRC
-
 
