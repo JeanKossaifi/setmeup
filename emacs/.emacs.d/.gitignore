@@ -45,10 +45,11 @@ flycheck_*.el
 # directory configuration
 .dir-locals.el
 
-#
+# SS - new additions
 ac-comphist.dat
 recentf
 .cache/
 projectile-bookmarks.eld
 myinit.el
 smex-items
+.mc-lists.el
