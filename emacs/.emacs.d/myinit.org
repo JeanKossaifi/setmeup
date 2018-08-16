@@ -4,7 +4,6 @@
 * Repos
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
-
 #+END_SRC
 
 * Personal Info
@@ -79,7 +78,7 @@ And this function prevents the spell checker to get inside source blocks in
 (lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
 #+END_SRC
 
-* diminish 
+* diminish
 #+BEGIN_SRC emacs-lisp
 (use-package diminish :ensure t)
 #+END_SRC
@@ -93,6 +92,7 @@ customize settings in [[file:init.el][init.el]].
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 #+end_src
+
 * Sane defaults
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
 
@@ -184,98 +184,6 @@ Page-Breaks in GNU Emacs" by Eric J. M. Ritz.]]
 #+begin_src emacs-lisp
 (use-package page-break-lines
   :ensure t)
-#+end_src
-
-* Theme
-** spacemacs-dark theme
-*Source*: [[https://github.com/nashamri/spacemacs-theme/issues/42][spacemacs-theme github]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package spacemacs-common
-    :ensure spacemacs-theme
-    :config (load-theme 'spacemacs-dark t))
-#+END_SRC
-** Solarized Light
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package solarized-theme :ensure t
-  :init (progn
-          (setq solarized-high-contrast-mode-line t
-                solarized-use-less-bold t
-                solarized-emphasize-indicators nil
-                solarized-scale-org-headlines nil
-                x-underline-at-descent-line t)
-          (load-theme 'solarized-light 'no-confirm))
-  :config (setq color-theme-is-global t))
-#+END_SRC
-
-** Monokai theme
-
-#+begin_src emacs-lisp :tangle no
-(use-package monokai-theme
-  :if (window-system)
-  :ensure t
-  :init
-  (setq monokai-use-variable-pitch nil))
-#+end_src
-
-** Cyberpunk theme
-
-The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
-boxes around the mode line.
-
-#+begin_src emacs-lisp :tangle no
-(use-package cyberpunk-theme
-  :if (window-system)
-  :ensure t
-  :init
-  (progn
-    (load-theme 'cyberpunk t)
-    (set-face-attribute `mode-line nil
-                        :box nil)
-    (set-face-attribute `mode-line-inactive nil
-                        :box nil)))
-#+end_src
-
-I tend to switch themes more often than normal. For example, switching
-to a lighter theme (such as the default) or to a different theme
-depending on the time of day or my mood. Normally, switching themes is
-a multi-step process with ~disable-theme~ and ~load-theme~. The
-~switch-theme~ function will do that in one swoop. I just choose which
-theme I want to go to.
-
-** Waher theme
-
-#+begin_src emacs-lisp :tangle no
-(use-package waher-theme
-  if (window-system)
-  :ensure t
-  :init
-  (load-theme 'waher))
-#+end_src
-
-** Convenient theme functions
-
-#+begin_src emacs-lisp
-(defun switch-theme (theme)
-  "Disables any currently active themes and loads THEME."
-  ;; This interactive call is taken from `load-theme'
-  (interactive
-   (list
-    (intern (completing-read "Load custom theme: "
-                             (mapc 'symbol-name
-                                   (custom-available-themes))))))
-  (let ((enabled-themes custom-enabled-themes))
-    (mapc #'disable-theme custom-enabled-themes)
-    (load-theme theme t)))
-
-(defun disable-active-themes ()
-  "Disables any currently active themes listed in `custom-enabled-themes'."
-  (interactive)
-  (mapc #'disable-theme custom-enabled-themes))
-
-(bind-key "s-<f12>" 'switch-theme)
-(bind-key "s-<f11>" 'disable-active-themes)
 #+end_src
 * Font
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
@@ -460,7 +368,6 @@ source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]
          ("C-x C-f" . helm-find-files)))
 #+end_src
 * Scratch
-
 Convenient package to create =*scratch*= buffers that are based on the
 current buffer's major mode. This is more convienent than manually
 creating a buffer to do some scratch work or reusing the initial
@@ -496,7 +403,6 @@ behavior when typing a templated snippet.
   (setq yas-indent-line 'fixed)
   (yas-global-mode))
 #+end_src
-
 * Recentf
 #+begin_src emacs-lisp
 (use-package recentf
@@ -555,6 +461,7 @@ behavior when typing a templated snippet.
 
             (global-set-key (kbd "C-c c") 'org-capture)
 
+            (setq org-ellipsis "⤵")
             (setq org-agenda-files (list "~/Dropbox/orgfiles/gcal.org"
           			       "~/Dropbox/orgfiles/i.org"
           			       "~/Dropbox/orgfiles/schedule.org"))
@@ -625,7 +532,7 @@ behavior when typing a templated snippet.
 
 * ido mode
 This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completion/][benaiah mischenko's setup]]
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package ido                        ; Better minibuffer completion
   :init (progn
           (ido-mode)
@@ -658,7 +565,7 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
   :bind
   ("M-x" . 'smex))
 #+END_SRC
-* Swiper / Ivy / Counsel
+* Counsel
   Swiper gives us a really efficient incremental search with regular expressions
   and Ivy / Counsel replace a lot of ido or helms completion functionality
   #+BEGIN_SRC emacs-lisp
@@ -668,8 +575,11 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
    (("M-y" . counsel-yank-pop)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
-
-
+  #+END_SRC
+* Ivy
+  Swiper gives us a really efficient incremental search with regular expressions
+  and Ivy / Counsel replace a lot of ido or helms completion functionality
+  #+BEGIN_SRC emacs-lisp
   (use-package ivy
   :ensure t
   :diminish (ivy-mode)
@@ -679,9 +589,11 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "%d/%d ")
   (setq ivy-display-style 'fancy))
+  #+END_SRC
 
-
-  (use-package swiper
+* Swiper
+#+BEGIN_SRC emacs-lisp
+(use-package swiper
   :ensure t
   :bind (("C-s" . swiper)
 	 ("C-r" . swiper)
@@ -695,8 +607,7 @@ This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completio
     (setq ivy-display-style 'fancy)
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
     ))
-  #+END_SRC
-
+#+END_SRC
 * Avy  
 *Source:* [[http://pragmaticemacs.com/emacs/super-efficient-movement-using-avy/][pragmatic emacs]]
 
@@ -710,7 +621,7 @@ See https://github.com/abo-abo/avy for more info
   #+END_SRC
   
 * Autocomplete
-  #+BEGIN_SRC emacs-lisp  :tangle no
+  #+BEGIN_SRC emacs-lisp
      (use-package auto-complete
      :ensure t
      :init
@@ -880,8 +791,15 @@ See https://github.com/abo-abo/avy for more info
 
 #+END_SRC
 
-#+RESULTS:
+#+RESULTS
+* gitignore
+#+BEGIN_SRC emacs-lisp
+(use-package gitignore-mode
+  :ensure t)
 
+(use-package helm-gitignore
+  :ensure t)
+#+END_SRC
 * git
 #+BEGIN_SRC emacs-lisp
   (use-package magit
@@ -1047,3 +965,94 @@ See https://github.com/abo-abo/avy for more info
 (add-hook 'org-mode-hook 'turn-on-flyspell)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 #+END_SRC
+* Theme
+** spacemacs-dark theme
+*Source*: [[https://github.com/nashamri/spacemacs-theme/issues/42][spacemacs-theme github]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-common
+    :ensure spacemacs-theme
+    :config (load-theme 'spacemacs-dark t))
+#+END_SRC
+** Solarized Light
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package solarized-theme :ensure t
+  :init (progn
+          (setq solarized-high-contrast-mode-line t
+                solarized-use-less-bold t
+                solarized-emphasize-indicators nil
+                solarized-scale-org-headlines nil
+                x-underline-at-descent-line t)
+          (load-theme 'solarized-light 'no-confirm))
+  :config (setq color-theme-is-global t))
+#+END_SRC
+
+** Monokai theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package monokai-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (setq monokai-use-variable-pitch nil))
+#+end_src
+
+** Cyberpunk theme
+
+The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
+boxes around the mode line.
+
+#+begin_src emacs-lisp :tangle no
+(use-package cyberpunk-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (progn
+    (load-theme 'cyberpunk t)
+    (set-face-attribute `mode-line nil
+                        :box nil)
+    (set-face-attribute `mode-line-inactive nil
+                        :box nil)))
+#+end_src
+
+I tend to switch themes more often than normal. For example, switching
+to a lighter theme (such as the default) or to a different theme
+depending on the time of day or my mood. Normally, switching themes is
+a multi-step process with ~disable-theme~ and ~load-theme~. The
+~switch-theme~ function will do that in one swoop. I just choose which
+theme I want to go to.
+
+** Waher theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package waher-theme
+  if (window-system)
+  :ensure t
+  :init
+  (load-theme 'waher))
+#+end_src
+
+** Convenient theme functions
+
+#+begin_src emacs-lisp
+(defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+  (let ((enabled-themes custom-enabled-themes))
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme theme t)))
+
+(defun disable-active-themes ()
+  "Disables any currently active themes listed in `custom-enabled-themes'."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(bind-key "s-<f12>" 'switch-theme)
+(bind-key "s-<f11>" 'disable-active-themes)
+#+end_src
