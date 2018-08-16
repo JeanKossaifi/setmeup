@@ -1,0 +1,3 @@
+[submodule "submodules/emacs/danielmai"]
+	path = submodules/emacs/danielmai
+	url = git@github.com:danielmai/.emacs.d.git
