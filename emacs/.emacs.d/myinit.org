@@ -1,11 +1,45 @@
+# -*- mode: org -*-
+# -*- coding: utf-8 -*-
+#+LANGUAGE:    en
+#+NAME: Shamindra Shrotriya's emacs init org config
+#+EMAIL: shamindra.shrotriya@.gmail.com
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+STARTUP: overview
-#+OPTIONS: toc:nil num:nil
 
 * Repos
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(require 'package)
+(setq package-archives
+'(("org" . "https://orgmode.org/elpa/")
+  ("ELPA" . "http://tromey.com/elpa/")
+  ("gnu" . "http://elpa.gnu.org/packages/")
+  ;; ("melpa" . "http://melpa.milkbox.net/packages/")
+  ("marmalade" . "http://marmalade-repo.org/packages/")))
+#+END_SRC
+* global-vars
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_SRC emacs-lisp
+(defvar config-basedir "~/.emacs.d/")
 #+END_SRC
 
+* myinit.org utils
+*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c i") 
+(lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
+#+END_SRC
+
+Shortcut to open the =init.org= file
+#+BEGIN_SRC emacs-lisp
+(defun find-config ()
+    "Edit config.org"
+    (interactive)
+    (find-file "~/.emacs.d/myinit.org"))
+
+  (global-set-key (kbd "C-c I") 'find-config) ;; Mapped to Ctrl-c Shift-i
+#+END_SRC
 * Personal Info
 
 #+begin_src emacs-lisp
@@ -22,9 +56,12 @@ everything like I do. =flyspell= is installed in new Emacs versions, but there
 are no completion tools by default in macOS, so we need to install the =aspell=
 engine by running =brew install aspell --with-lang-en=
 
+#+BEGIN_SRC sh
+brew install aspell --with-lang-en
+#+END_SRC
+
 To make =flyspell= not clash with different syntax in the same file (like for
 example, LaTeX or =org-mode= one) we need the last hook message.
-
 
 #+BEGIN_SRC emacs-lisp :results silent
 (use-package flyspell
@@ -70,18 +107,12 @@ And this function prevents the spell checker to get inside source blocks in
     (setq ad-return-value rlt)))
 #+END_SRC
 
-* Load myinit.org
-*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
-
-#+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-c i") 
-(lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
-#+END_SRC
-
 * diminish
+
 #+BEGIN_SRC emacs-lisp
 (use-package diminish :ensure t)
 #+END_SRC
+
 * Customize settings
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
 
@@ -135,10 +166,11 @@ customize settings in [[file:init.el][init.el]].
 
 ; Highlights the current cursor line
 (global-hl-line-mode t)
+(setq global-linum-mode t)
 
 (show-paren-mode t)
 
-(line-number-mode 1)
+;;(line-number-mode 1)
 (column-number-mode t)
 
 (global-visual-line-mode)
@@ -415,13 +447,18 @@ behavior when typing a templated snippet.
 * which key
   Brings up some help
   #+BEGIN_SRC emacs-lisp
-  (use-package which-key
-	:ensure t
-	:config
-	(which-key-mode))
+(use-package which-key
+    :ensure t
+    :diminish which-key-mode
+    :config
+    (add-hook 'after-init-hook 'which-key-mode)) 
+; (use-package which-key
+;	:ensure t
+;	:config
+;	(which-key-mode))
   #+END_SRC
 
-* Org mode
+* Org-mode
 
 
   Org bullets makes things look pretty
@@ -619,17 +656,6 @@ See https://github.com/abo-abo/avy for more info
   :ensure t
   :bind (("M-s" . avy-goto-word-1)))
   #+END_SRC
-  
-* Autocomplete
-  #+BEGIN_SRC emacs-lisp
-     (use-package auto-complete
-     :ensure t
-     :init
-     (progn
-     (ac-config-default)
-       (global-auto-complete-mode t)
-      ))
-  #+END_SRC
 * Flycheck
   #+BEGIN_SRC emacs-lisp
     (use-package flycheck
@@ -695,25 +721,17 @@ See https://github.com/abo-abo/avy for more info
   :config
   (global-hungry-delete-mode))
 
-
-  (use-package multiple-cursors
-  :ensure t)
-
   ; expand the marked region in semantic increments (negative prefix to reduce region)
   (use-package expand-region
   :ensure t
   :config
   (global-set-key (kbd "C-=") 'er/expand-region))
-
-(setq save-interprogram-paste-before-kill t)
-
-
-(global-auto-revert-mode 1) ;; you might not want this
-(setq auto-revert-verbose nil) ;; or this
-(global-set-key (kbd "<f5>") 'revert-buffer)
-(global-set-key (kbd "<f6>") 'revert-buffer)
+  
+  (setq save-interprogram-paste-before-kill t)
 
 
+  (global-auto-revert-mode 1) ;; you might not want this
+  (setq auto-revert-verbose nil) ;; or this
 
   #+END_SRC
 
@@ -873,10 +891,16 @@ See https://github.com/abo-abo/avy for more info
   (add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
   (add-to-list 'auto-mode-alist '("\\.markdown\\'" . gfm-mode)))
 #+END_SRC
+
 * yaml-mode
 *Source:* [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's config]]
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode
+  :ensure t)
+#+END_SRC
+* make-mode
+ #+BEGIN_SRC emacs-lisp
+(use-package make-mode
   :ensure t)
 #+END_SRC
 * multiple-cursors
@@ -902,7 +926,22 @@ See https://github.com/abo-abo/avy for more info
          ("<C-M-down>" . move-text-down)))
 #+END_SRC
 * powerline
+*Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
+
+Spaceline is similar to the Spacemacs mode-line.
 #+BEGIN_SRC emacs-lisp
+(use-package spaceline
+  :ensure t
+  :demand t
+  :init
+  (setq powerline-default-separator 'arrow-fade)
+  :config
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  (spaceline-helm-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package powerline
   :ensure t
   :init
@@ -964,6 +1003,51 @@ See https://github.com/abo-abo/avy for more info
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'turn-on-flyspell)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+  
+* Autocomplete
+  #+BEGIN_SRC emacs-lisp
+     (use-package auto-complete
+     :ensure t
+     :init
+     (progn
+     (ac-config-default)
+     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
+     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
+     ;;; activate, otherwise, auto-complete will
+     (ac-set-trigger-key "TAB")
+     (ac-set-trigger-key "<tab>")
+       (global-auto-complete-mode t)
+      ))
+  #+END_SRC
+* fill-column-indicator + column-enforce-mode
+*Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package column-enforce-mode
+  :ensure t
+  :diminish column-enforce-mode
+  :init
+  (setq column-enforce-column 99)
+  :config
+  (progn
+    (add-hook 'prog-mode-hook 'column-enforce-mode)))
+#+END_SRC
+
+This package is similar to Column enforce mode but adds a line as a
+margin instead of being subtle. I make sure my code has a soft limit
+of 80 characters per line and a hard limit of 100 characters per line.
+Therefore I enable this for 80 characters and column enforce mode
+for 100. 
+
+
+#+BEGIN_SRC emacs-lisp
+(use-package fill-column-indicator
+  :ensure t
+  :commands (fci-mode)
+  :init
+  (setq fci-rule-width 5
+        fci-rule-column 79))
 #+END_SRC
 * Theme
 ** spacemacs-dark theme
@@ -1056,3 +1140,24 @@ theme I want to go to.
 (bind-key "s-<f12>" 'switch-theme)
 (bind-key "s-<f11>" 'disable-active-themes)
 #+end_src
+
+* auto-mode-alist
+*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+#+BEGIN_SRC emacs-lisp
+(setq auto-mode-alist
+   (append (mapcar 'purecopy
+      '(
+        ("\\.org$" . org-mode)
+        ("\\.el$"  . emacs-lisp-mode)
+        ("emacs"  . emacs-lisp-mode)
+        ("\\.md\\'" . markdown-mode)
+        ("\\.tex$" . LaTeX-mode)
+        ("\\.txi$" . Texinfo-mode)
+        ("[mM]akefile" . makefile-mode)
+        ("[mM]akefile.*" . makefile-mode)
+        ("\\.mk\\'" . makefile-mode)
+        ("\\.mak" . makefile-mode)
+        ("\\.cshrc" . sh-mode)
+        ("\\.html$" . html-mode)
+)) auto-mode-alist))
+#+END_SRC
