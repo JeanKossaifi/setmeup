@@ -21,6 +21,7 @@
 
 #+BEGIN_SRC emacs-lisp
 (defvar config-basedir "~/.emacs.d/")
+;;(defvar orgfiles-basedir "~/")
 #+END_SRC
 
 * myinit.org utils
@@ -436,6 +437,8 @@ behavior when typing a templated snippet.
   (yas-global-mode))
 #+end_src
 * Recentf
+
+Display recent files used - makes it really quick to load them this way.
 #+begin_src emacs-lisp
 (use-package recentf
   :bind ("C-x C-r" . helm-recentf)
@@ -458,99 +461,65 @@ behavior when typing a templated snippet.
 ;	(which-key-mode))
   #+END_SRC
 
-* Org-mode
+* org-mode
+*Source* [[https://github.com/cocreature/dotfiles/blob/master/emacs/.emacs.d/emacs.org#org][cocreature's amazing config]]
 
+Basically taken from =cocreature's= config with minimal modification.
 
-  Org bullets makes things look pretty
-  #+BEGIN_SRC emacs-lisp
-
-  (use-package org
+#+BEGIN_SRC emacs-lisp
+(use-package org
   :ensure t
-  :pin org)
+  :mode ("\\.org\\'" . org-mode)
+  :bind (("C-c l" . org-store-link)
+         ("C-c c" . org-capture)
+         ("C-c a" . org-agenda)
+         ("C-c b" . org-iswitchb)
+         ("C-c C-w" . org-refile)
+         ("C-c j" . org-clock-goto)
+         ("C-c C-x C-o" . org-clock-out))
+  :config
+  (progn
+    ;; The GTD part of this config is heavily inspired by
+    ;; https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
+    (setq org-directory "~/DROPBOX/REPOS/ss_orgfiles")
+    (setq org-agenda-files
+          (mapcar (lambda (path) (concat org-directory path))
+                  '("/todo.org"
+                    "/journal.org")))
+    (setq org-log-done 'time)
+    (setq org-src-fontify-natively t)
+    (setq org-use-speed-commands t)
+    (setq org-capture-templates
+          '(("j" "Journal" entry
+             (file+headline "~/DROPBOX/REPOS/ss_orgfiles/journal.org" "Journal Entries")
+             "* %i%?")
+            ("t" "Todo [Inbox]" entry
+             (file+headline "~/DROPBOX/REPOS/ss_orgfiles/todo.org" "TODOs")
+             "* TODO %i%? \n %^t")))
+    (setq org-refile-targets
+          '(("~/DROPBOX/REPOS/ss_orgfiles/todo.org" :maxlevel . 3)))
+    (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+    (setq org-agenda-custom-commands
+          '(("@" "Contexts"
+             ((tags-todo "@email"
+                         ((org-agenda-overriding-header "Emails")))
+              (tags-todo "@phone"
+                         ((org-agenda-overriding-header "Phone")))))))
+    (setq org-clock-persist t)
+    (org-clock-persistence-insinuate)
+    (setq org-time-clocksum-format '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))))
 
-    (setenv "BROWSER" "google-chrome-stable")
+(use-package org-inlinetask
+  :bind (:map org-mode-map
+              ("C-c C-x t" . org-inlinetask-insert-task))
+  :after (org)
+  :commands (org-inlinetask-insert-task))
 
-        (use-package org-bullets
-        :ensure t
-        :config
-        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-
-            (custom-set-variables
-             '(org-directory "~/Dropbox/orgfiles")
-             '(org-default-notes-file (concat org-directory "/notes.org"))
-             '(org-export-html-postamble nil)
-             '(org-hide-leading-stars t)
-             '(org-startup-folded (quote overview))
-             '(org-startup-indented t)
-             )
-
-            (setq org-file-apps
-  		(append '(
-          		  ("\\.pdf\\'" . "evince %s")
-          		  ) org-file-apps ))
-
-            (global-set-key "\C-ca" 'org-agenda)
-
-            (setq org-agenda-custom-commands
-            '(("c" "Simple agenda view"
-            ((agenda "")
-            (alltodo "")))))
-
-            (global-set-key (kbd "C-c c") 'org-capture)
-
-            (setq org-ellipsis "⤵")
-            (setq org-agenda-files (list "~/Dropbox/orgfiles/gcal.org"
-          			       "~/Dropbox/orgfiles/i.org"
-          			       "~/Dropbox/orgfiles/schedule.org"))
-            (setq org-capture-templates
-          			  '(("a" "Appointment" entry (file  "~/Dropbox/orgfiles/gcal.org" )
-          				   "* %?\n\n%^T\n\n:PROPERTIES:\n\n:END:\n\n")
-          				  ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
-          				   "* %? %^L %^g \n%T" :prepend t)
-          				  ("b" "Blog idea" entry (file+headline "~/Dropbox/orgfiles/i.org" "Blog Topics:")
-          				   "* %?\n%T" :prepend t)
-          				  ("t" "To Do Item" entry (file+headline "~/Dropbox/orgfiles/i.org" "To Do")
-          				   "* TODO %?\n%u" :prepend t)
-  					  ("m" "Mail To Do" entry (file+headline "~/Dropbox/orgfiles/i.org" "To Do")
-  					   "* TODO %a\n %?" :prepend t)
-  					  ("g" "GMail To Do" entry (file+headline "~/Dropbox/orgfiles/i.org" "To Do")
-  					   "* TODO %^L\n %?" :prepend t)
-  					  ("n" "Note" entry (file+headline "~/Dropbox/orgfiles/i.org" "Note space")
-          				   "* %?\n%u" :prepend t)
-  					  ))
-
-        (defadvice org-capture-finalize
-            (after delete-capture-frame activate)
-        "Advise capture-finalize to close the frame"
-        (if (equal "capture" (frame-parameter nil 'name))
-        (delete-frame)))
-
-        (defadvice org-capture-destroy
-            (after delete-capture-frame activate)
-        "Advise capture-destroy to close the frame"
-        (if (equal "capture" (frame-parameter nil 'name))
-        (delete-frame)))
-
-        (use-package noflet
-        :ensure t )
-        (defun make-capture-frame ()
-        "Create a new frame and run org-capture."
-        (interactive)
-        (make-frame '((name . "capture")))
-        (select-frame-by-name "capture")
-        (delete-other-windows)
-        (noflet ((switch-to-buffer-other-window (buf) (switch-to-buffer buf)))
-            (org-capture)))
-
-(require 'ox-beamer)
-; for inserting inactive dates
-(define-key org-mode-map (kbd "C-c >") (lambda () (interactive (org-time-stamp-inactive))))
-
-
-  #+END_SRC
-
-  #+RESULTS:
-  : make-capture-frame
+(use-package org-bullets
+  :ensure t
+  :commands (org-bullets-mode)
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
 
 * Ace windows for easy window switching
   #+BEGIN_SRC emacs-lisp

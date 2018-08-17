@@ -53,3 +53,10 @@ projectile-bookmarks.eld
 myinit.el
 smex-items
 .mc-lists.el
+myinit.pdf
+myinit.tex
+# we may have another folder named bookmarks, so only ignore the emacs-specific one
+emacs/.emacs.d/bookmarks
+network-security.data
+org-clock-save.el
+
