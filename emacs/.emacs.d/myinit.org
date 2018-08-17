@@ -461,7 +461,136 @@ Display recent files used - makes it really quick to load them this way.
 ;	(which-key-mode))
   #+END_SRC
 
-* org-mode
+* pdf-tools
+
+You need to run the following for =mac=
+#+BEGIN_SRC sh
+brew install automake
+brew install autoconf
+brew reinstall pkg-config
+brew tap dunn/emacs # this is where homebrew sources pdf-tools at the time of setting up this code
+brew install pdf-tools
+#+END_SRC
+
+** General pdf-tools setup 
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package tablist
+ :ensure t)
+
+(use-package pdf-tools
+  :ensure t
+  :after hydra
+  :config
+
+  ;; Install what need to be installed !
+  (pdf-tools-install t t t)
+  ;; open pdfs scaled to fit page
+  (setq-default pdf-view-display-size 'fit-page)
+  ;; automatically annotate highlights
+  (setq pdf-annot-activate-created-annotations t)
+  ;; use normal isearch
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+  ;; more fine-grained zooming
+  (setq pdf-view-resize-factor 1.1)
+
+  ;;
+  (add-hook 'pdf-view-mode-hook
+            (lambda ()
+              (pdf-misc-size-indication-minor-mode)
+              (pdf-links-minor-mode)
+              (pdf-isearch-minor-mode)
+              (cua-mode 0)
+              ))
+
+  (add-to-list 'auto-mode-alist (cons "\\.pdf$" 'pdf-view-mode))
+
+  ;; Keys
+  (bind-keys :map pdf-view-mode-map
+             ("/" . hydra-pdftools/body)
+             ("<s-spc>" .  pdf-view-scroll-down-or-next-page)
+             ("g"  . pdf-view-first-page)
+             ("G"  . pdf-view-last-page)
+             ("l"  . image-forward-hscroll)
+             ("h"  . image-backward-hscroll)
+             ("j"  . pdf-view-next-page)
+             ("k"  . pdf-view-previous-page)
+             ("e"  . pdf-view-goto-page)
+             ("u"  . pdf-view-revert-buffer)
+             ("al" . pdf-annot-list-annotations)
+             ("ad" . pdf-annot-delete)
+             ("aa" . pdf-annot-attachment-dired)
+             ("am" . pdf-annot-add-markup-annotation)
+             ("at" . pdf-annot-add-text-annotation)
+             ("y"  . pdf-view-kill-ring-save)
+             ("i"  . pdf-misc-display-metadata)
+             ("s"  . pdf-occur)
+             ("b"  . pdf-view-set-slice-from-bounding-box)
+             ("r"  . pdf-view-reset-slice))
+
+  (defhydra hydra-pdftools (:color blue :hint nil)
+    "
+      PDF tools
+
+   Move  History   Scale/Fit                  Annotations     Search/Link     Do
+------------------------------------------------------------------------------------------------
+     ^^_g_^^      _B_    ^↧^    _+_    ^ ^     _al_: list    _s_: search    _u_: revert buffer
+     ^^^↑^^^      ^↑^    _H_    ^↑^  ↦ _W_ ↤   _am_: markup  _o_: outline   _i_: info
+     ^^_p_^^      ^ ^    ^↥^    _0_    ^ ^     _at_: text    _F_: link      _d_: dark mode
+     ^^^↑^^^      ^↓^  ╭─^─^─┐  ^↓^  ╭─^ ^─┐   _ad_: delete  _f_: search link
+_h_ ←pag_e_→ _l_  _N_  │ _P_ │  _-_    _b_     _aa_: dired
+     ^^^↓^^^      ^ ^  ╰─^─^─╯  ^ ^  ╰─^ ^─╯   _y_:  yank
+     ^^_n_^^      ^ ^  _r_eset slice box
+     ^^^↓^^^
+     ^^_G_^^
+"
+          ("\\" hydra-master/body "back")
+          ("<ESC>" nil "quit")
+          ("al" pdf-annot-list-annotations)
+          ("ad" pdf-annot-delete)
+          ("aa" pdf-annot-attachment-dired)
+          ("am" pdf-annot-add-markup-annotation)
+          ("at" pdf-annot-add-text-annotation)
+          ("y"  pdf-view-kill-ring-save)
+          ("+" pdf-view-enlarge :color red)
+          ("-" pdf-view-shrink :color red)
+          ("0" pdf-view-scale-reset)
+          ("H" pdf-view-fit-height-to-window)
+          ("W" pdf-view-fit-width-to-window)
+          ("P" pdf-view-fit-page-to-window)
+          ("n" pdf-view-next-page-command :color red)
+          ("p" pdf-view-previous-page-command :color red)
+          ("d" pdf-view-dark-minor-mode)
+          ("b" pdf-view-set-slice-from-bounding-box)
+          ("r" pdf-view-reset-slice)
+          ("g" pdf-view-first-page)
+          ("G" pdf-view-last-page)
+          ("e" pdf-view-goto-page)
+          ("o" pdf-outline)
+          ("s" pdf-occur)
+          ("i" pdf-misc-display-metadata)
+          ("u" pdf-view-revert-buffer)
+          ("F" pdf-links-action-perfom)
+          ("f" pdf-links-isearch-link)
+          ("B" pdf-history-backward :color red)
+          ("N" pdf-history-forward :color red)
+          ("l" image-forward-hscroll :color red)
+          ("h" image-backward-hscroll :color red)))
+#+END_SRC
+
+** orgmode specific pdf setup
+#+BEGIN_SRC emacs-lisp
+(use-package org-pdfview
+  :ensure t
+  :config
+
+  (add-to-list 'org-file-apps
+               '("\\.pdf\\'" . (lambda (file link) (org-pdfview-open link)))))
+#+END_SRC
+* orgmode
+
+** Main org-mode setup with org-capture
 *Source* [[https://github.com/cocreature/dotfiles/blob/master/emacs/.emacs.d/emacs.org#org][cocreature's amazing config]]
 
 Basically taken from =cocreature's= config with minimal modification.
@@ -519,6 +648,71 @@ Basically taken from =cocreature's= config with minimal modification.
   :ensure t
   :commands (org-bullets-mode)
   :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+END_SRC
+
+** live PDF updates in orgmode
+*Source:* [[https://github.com/munen/emacs.d/#convenience-functions-when-working-with-pdf-exports][munen's awesome config]]
+
+To quote directly Alain Lafon who wrote this:
+#+BEGIN_QUOTE
+When working on markdown or org-mode files that will be converted to PDF, I use =pdf-tools= to preview the PDF and shortcuts to automatically save, compile and reload on demand.
+
+[[https://www.youtube.com/watch?v=Pd0JwOqh-gI][Here]] is a screencast showing how I edit Markdown or org-mode files in Emacs whilst having a PDF preview.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(defun md-compile ()
+  "Compiles the currently loaded markdown file using pandoc into a PDF"
+  (interactive)
+  (save-buffer)
+  (shell-command (concat "pandoc " (buffer-file-name) " -o "
+                         (replace-regexp-in-string "md" "pdf" (buffer-file-name)))))
+
+(defun update-other-buffer ()
+  (interactive)
+  (other-window 1)
+  (revert-buffer nil t)
+  (other-window -1))
+
+(defun md-compile-and-update-other-buffer ()
+  "Has as a premise that it's run from a markdown-mode buffer and the
+   other buffer already has the PDF open"
+  (interactive)
+  (md-compile)
+  (update-other-buffer))
+
+(defun latex-compile-and-update-other-buffer ()
+  "Has as a premise that it's run from a latex-mode buffer and the
+   other buffer already has the PDF open"
+  (interactive)
+  (save-buffer)
+  (shell-command (concat "pdflatex " (buffer-file-name)))
+  (switch-to-buffer (other-buffer))
+  (kill-buffer)
+  (update-other-buffer))
+
+(defun org-compile-beamer-and-update-other-buffer ()
+  "Has as a premise that it's run from an org-mode buffer and the
+   other buffer already has the PDF open"
+  (interactive)
+  (org-beamer-export-to-pdf)
+  (update-other-buffer))
+
+(defun org-compile-latex-and-update-other-buffer ()
+  "Has as a premise that it's run from an org-mode buffer and the
+   other buffer already has the PDF open"
+  (interactive)
+  (org-latex-export-to-pdf)
+  (update-other-buffer))
+
+(eval-after-load 'latex-mode
+  '(define-key latex-mode-map (kbd "C-c r") 'latex-compile-and-update-other-buffer))
+
+(define-key org-mode-map (kbd "C-c lr") 'org-compile-latex-and-update-other-buffer)
+(define-key org-mode-map (kbd "C-c br") 'org-compile-beamer-and-update-other-buffer)
+
+(eval-after-load 'markdown-mode
+  '(define-key markdown-mode-map (kbd "C-c r") 'md-compile-and-update-other-buffer))
 #+END_SRC
 
 * Ace windows for easy window switching
