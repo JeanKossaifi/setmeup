@@ -61,3 +61,4 @@ network-security.data
 org-clock-save.el
 abbrev_defs
 .emacs.desktop
+custom.el

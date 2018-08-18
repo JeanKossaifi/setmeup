@@ -125,7 +125,7 @@ the use of our customized snippets
   )
 #+END_SRC
 
-* myinit.org utils
+* myinit utils
 *Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
 
 #+BEGIN_SRC emacs-lisp
@@ -886,6 +886,42 @@ When working on markdown or org-mode files that will be converted to PDF, I use 
 
 (eval-after-load 'markdown-mode
   '(define-key markdown-mode-map (kbd "C-c r") 'md-compile-and-update-other-buffer))
+#+END_SRC
+* Biblio-references
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy-bibtex
+  :ensure t
+  :config
+  (setq ivy-bibtex-bibliography "~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib" ;; where your references are stored
+        ivy-bibtex-library-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/lib/" ;; where your pdfs etc are stored
+        ivy-bibtex-notes-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org" ;; where your notes are stored
+        bibtex-completion-bibliography "~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib" ;; writing completion
+        bibtex-completion-notes-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org"))
+
+(use-package org-ref
+  :after org
+  :ensure t
+  ;;:chords
+  ;;(("uu"  . org-ref-cite-hydra/body))
+  :init
+  (setq org-ref-completion-library 'org-ref-ivy-cite
+        org-ref-notes-directory "~/DROPBOX/REPOS/ss_orgfiles/biblio"
+        org-ref-bibliography-notes "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org"
+        org-ref-default-bibliography '("~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib")
+        org-ref-pdf-directory "~/DROPBOX/REPOS/ss_orgfiles/biblio/lib/")
+
+  :config
+  (add-hook 'org-export-before-parsing-hook 'orcp-citeproc))
+
+(use-package interleave
+  :ensure t
+  :bind ("C-x i" . interleave-mode)
+  :config
+  (setq interleave-split-direction 'horizontal
+        interleave-split-lines 20
+        interleave-disable-narrowing t))
 #+END_SRC
 
 * Ace windows for easy window switching
