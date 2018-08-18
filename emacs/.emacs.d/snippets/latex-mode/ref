@@ -1,7 +1,7 @@
  -*- mode: snippet -*-
 # contributor : Márcio M. Ribeiro <marcio.mr@gmail.com>
-# key: lab
+# key: ref
 # group: references
-# name : \label
+# name : \ref
 # --
-\label{${1:label$(unless yas/modified-p (reftex-label nil 'dont-insert))}}$0
+\ref{${1:label$(unless yas/modified-p (reftex-reference nil 'dont-insert))}}$0

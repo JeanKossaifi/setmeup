@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: yaml-front-matter
+# key: blog
+# --
+#+TITLE: $1
+#+DATE: `(format-time-string "%Y-%m-%d" (current-time))`
+#+CATEGORY: $2
+#+KEYWORDS: ${3:tags}
+#+LAYOUT: ${4:$$(yas/choose-value '("default" "page" "post"))}
+#+PUBLISHED: true
+#+COMMENTS: true
+#+SUMMARY:
+
+$0
+
+
+#+HTML: <!-- more -->

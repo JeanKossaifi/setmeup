@@ -1,9 +1,9 @@
 # -*- mode: snippet -*-
 # contributor : Mads D. Kristensen <madsdk@gmail.com>
-# key : item
+# key: enum
 # group: environments
-# name : \begin{itemize} ... \end{itemize}
+# name : \begin{enumerate} ... \end{enumerate}
 # --
-\begin{itemize}
+\begin{enumerate}
 \item $0
-\end{itemize}
+\end{enumerate}

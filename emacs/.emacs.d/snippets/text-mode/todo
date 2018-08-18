@@ -1,5 +1,4 @@
-# -*- mode: snippet -*-
-# name: todo
-# key: t
+#name : # todo
+# key: todo
 # --
-`(yas-with-comment "TODO: ")`
+`(concat comment-start " TODO ")`

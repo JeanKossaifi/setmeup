@@ -1,0 +1,5 @@
+#name : link
+#key : link
+# --
+\`${1:Title}\`_ $0
+.. _$1: ${2:url}

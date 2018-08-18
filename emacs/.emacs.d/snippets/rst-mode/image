@@ -1,10 +1,8 @@
 # -*- mode: snippet -*-
-# name: image
-# key: img
+# name : image
+# key : img
 # --
 .. image:: ${1:path}
-   :height: ${2:100}
-   :width: ${3:200}
-   :alt: ${4:description}
-
+   :align: ${2:$$(yas-choose-value '("right" "left" "center"))}
+   :width: ${3:$$(yas-choose-value '("300" "400" "600"))}
 $0

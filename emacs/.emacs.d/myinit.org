@@ -1400,7 +1400,9 @@ for 100.
         ("[mM]akefile.*" . makefile-mode)
         ("\\.mk\\'" . makefile-mode)
         ("\\.mak" . makefile-mode)
+        ("\\.py\\'" . python-mode)
         ("\\.cshrc" . sh-mode)
+        ("\\.emacs.d/snippets/" . snippet-mode)
         ("\\.html$" . html-mode)
 )) auto-mode-alist))
 #+END_SRC

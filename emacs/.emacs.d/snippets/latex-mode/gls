@@ -1,5 +1,8 @@
 # -*- mode: snippet -*-
-# name: gls
-# key: g
+# contributor : Peter Urbak <peter@dragonwasrobot.com>
+# key : newgls
+# group: misc
+# name : \newglossaryentry{...}{...}
 # --
-\gls{${1:label}}
+\newglossaryentry{$1}{name={$1},
+  description={$2.}}

@@ -1,0 +1,6 @@
+#name : section 3
+#key : s3
+# --
+${1:subsection yas-name}
+${1:$(make-string (string-width yas-text) ?\~)}
+$0
