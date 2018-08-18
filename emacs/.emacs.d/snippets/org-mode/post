@@ -1,18 +1,17 @@
 # -*- mode: snippet -*-
-# name: post
+# name: post-headers
 # key: post
-# expand-env: ((yas-indent-line 'fixed) (yas-wrap-around-region 'nil))
 # --
-#+BEGIN_COMMENT
-.. title: ${1:`(capitalize (replace-regexp-in-string "-\\|_" " " (file-name-base))))`}
-.. slug: `(file-name-base)`
-.. date: `(format-time-string "%Y-%m-%d %H:%M:%S UTC-04:00" (current-time))`
-.. tags: $2
-.. category: 
-.. link: 
-.. description: 
-.. type: text
-#+END_COMMENT
+#+TITLE: $1
+#+DATE: `(format-time-string "%Y-%m-%d" (current-time))`
+#+CATEGORY: $2
+#+KEYWORDS: ${3:tags}
+#+LAYOUT: post
+#+PUBLISHED: true
+#+COMMENTS: true
+#+SUMMARY:
+#+OPTIONS: ^:nil
 
-* 
 $0
+
+#+HTML: <!-- more -->

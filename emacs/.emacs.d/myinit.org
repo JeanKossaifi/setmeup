@@ -1,6 +1,6 @@
 # -*- mode: org -*-
-# -*- coding: utf-8 -*-
 #+LANGUAGE:    en
+# -*- coding: utf-8 -*-
 #+NAME: Shamindra Shrotriya's emacs init org config
 #+EMAIL: shamindra.shrotriya@.gmail.com
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -13,7 +13,8 @@
 '(("org" . "https://orgmode.org/elpa/")
   ("ELPA" . "http://tromey.com/elpa/")
   ("gnu" . "http://elpa.gnu.org/packages/")
-  ;; ("melpa" . "http://melpa.milkbox.net/packages/")
+  ("melpa-stable" . "http://stable.melpa.org/packages/")
+  ("melpa" . "http://melpa.milkbox.net/packages/")
   ("marmalade" . "http://marmalade-repo.org/packages/")))
 #+END_SRC
 * global-vars
@@ -57,7 +58,7 @@ everything like I do. =flyspell= is installed in new Emacs versions, but there
 are no completion tools by default in macOS, so we need to install the =aspell=
 engine by running =brew install aspell --with-lang-en=
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :tangle no
 brew install aspell --with-lang-en
 #+END_SRC
 
@@ -218,7 +219,100 @@ Page-Breaks in GNU Emacs" by Eric J. M. Ritz.]]
 (use-package page-break-lines
   :ensure t)
 #+end_src
-* Font
+* Appearance
+** Themes
+*** spacemacs-dark theme
+*Source*: [[https://github.com/nashamri/spacemacs-theme/issues/42][spacemacs-theme github]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-common
+    :ensure spacemacs-theme
+    :config (load-theme 'spacemacs-dark t))
+#+END_SRC
+*** Solarized Light
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package solarized-theme :ensure t
+  :init (progn
+          (setq solarized-high-contrast-mode-line t
+                solarized-use-less-bold t
+                solarized-emphasize-indicators nil
+                solarized-scale-org-headlines nil
+                x-underline-at-descent-line t)
+          (load-theme 'solarized-light 'no-confirm))
+  :config (setq color-theme-is-global t))
+#+END_SRC
+
+*** Monokai theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package monokai-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (setq monokai-use-variable-pitch nil))
+#+end_src
+
+*** Cyberpunk theme
+
+The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
+boxes around the mode line.
+
+#+begin_src emacs-lisp :tangle no
+(use-package cyberpunk-theme
+  :if (window-system)
+  :ensure t
+  :init
+  (progn
+    (load-theme 'cyberpunk t)
+    (set-face-attribute `mode-line nil
+                        :box nil)
+    (set-face-attribute `mode-line-inactive nil
+                        :box nil)))
+#+end_src
+
+I tend to switch themes more often than normal. For example, switching
+to a lighter theme (such as the default) or to a different theme
+depending on the time of day or my mood. Normally, switching themes is
+a multi-step process with ~disable-theme~ and ~load-theme~. The
+~switch-theme~ function will do that in one swoop. I just choose which
+theme I want to go to.
+
+*** Waher theme
+
+#+begin_src emacs-lisp :tangle no
+(use-package waher-theme
+  if (window-system)
+  :ensure t
+  :init
+  (load-theme 'waher))
+#+end_src
+
+*** Convenient theme functions
+
+#+begin_src emacs-lisp
+(defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+  (let ((enabled-themes custom-enabled-themes))
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme theme t)))
+
+(defun disable-active-themes ()
+  "Disables any currently active themes listed in `custom-enabled-themes'."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(bind-key "s-<f12>" 'switch-theme)
+(bind-key "s-<f11>" 'disable-active-themes)
+#+end_src
+
+** Font
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]] and [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
 
 [[http://adobe-fonts.github.io/source-code-pro/][Source Code Pro]] is a nice monospaced font.
@@ -238,12 +332,12 @@ And here's how we tell Emacs to use the font we want to use.
 
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist
-             '(font . "Source Code Pro-22"))
+             '(font . "Source Code Pro-24"))
 #+end_src
 
 We can set the default font size:
 #+BEGIN_SRC emacs-lisp
-(set-frame-font "Source Code Pro-22")
+(set-frame-font "Source Code Pro-24")
 #+END_SRC
 
 Note: To view all fonts that are available to use, run the following:
@@ -464,7 +558,7 @@ Display recent files used - makes it really quick to load them this way.
 * pdf-tools
 
 You need to run the following for =mac=
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :tangle no
 brew install automake
 brew install autoconf
 brew reinstall pkg-config
@@ -973,7 +1067,121 @@ See https://github.com/abo-abo/avy for more info
 #+END_SRC
 
 #+RESULTS
-* gitignore
+* git
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+** Global
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :ensure t
+  :config
+
+  ;; Ignore recent commit
+  (setq magit-status-sections-hook
+        '(magit-insert-status-headers
+          magit-insert-merge-log
+          magit-insert-rebase-sequence
+          magit-insert-am-sequence
+          magit-insert-sequencer-sequence
+          magit-insert-bisect-output
+          magit-insert-bisect-rest
+          magit-insert-bisect-log
+          magit-insert-untracked-files
+          magit-insert-unstaged-changes
+          magit-insert-staged-changes
+          magit-insert-stashes
+          magit-insert-unpulled-from-upstream
+          magit-insert-unpulled-from-pushremote
+          magit-insert-unpushed-to-upstream
+          magit-insert-unpushed-to-pushremote))
+
+
+  ;; Update visualization
+  (setq pretty-magit-alist nil
+        pretty-magit-prompt nil)
+
+  (defmacro pretty-magit (WORD ICON PROPS &optional NO-PROMPT?)
+    "Replace sanitized WORD with ICON, PROPS and by default add to prompts."
+    `(prog1
+         (add-to-list 'pretty-magit-alist
+                      (list (rx bow (group ,WORD (eval (if ,NO-PROMPT? "" ":"))))
+                            ,ICON ',PROPS))
+       (unless ,NO-PROMPT?
+         (add-to-list 'pretty-magit-prompt (concat ,WORD ": ")))))
+
+  (pretty-magit "Feature" ? (:foreground "slate gray" :height 1.2) pretty-magit-prompt)
+  (pretty-magit ": add"   ? (:foreground "#375E97" :height 1.2) pretty-magit-prompt)
+  (pretty-magit ": fix"   ? (:foreground "#FB6542" :height 1.2) pretty-magit-prompt)
+  (pretty-magit ": clean" ? (:foreground "#FFBB00" :height 1.2) pretty-magit-prompt)
+  (pretty-magit ": docs"  ? (:foreground "#3F681C" :height 1.2) pretty-magit-prompt)
+  (pretty-magit "master"  ? (:box t :height 1.2) t)
+  (pretty-magit "origin"  ? (:box t :height 1.2) t)
+
+  (defun add-magit-faces ()
+    "Add face properties and compose symbols for buffer from pretty-magit."
+    (interactive)
+    (with-silent-modifications
+      (--each pretty-magit-alist
+        (-let (((rgx icon props) it))
+          (save-excursion
+            (goto-char (point-min))
+            (while (search-forward-regexp rgx nil t)
+              (compose-region
+               (match-beginning 1) (match-end 1) icon)
+              (when props
+                (add-face-text-property
+                 (match-beginning 1) (match-end 1) props))))))))
+
+  (advice-add 'magit-status :after 'add-magit-faces)
+  (advice-add 'magit-refresh-buffer :after 'add-magit-faces)
+
+
+  ;; Opening repo externally
+  (defun parse-url (url)
+    "convert a git remote location as a HTTP URL"
+    (if (string-match "^http" url)
+        url
+      (replace-regexp-in-string "\\(.*\\)@\\(.*\\):\\(.*\\)\\(\\.git?\\)"
+                                "https://\\2/\\3"
+                                url)))
+  (defun magit-open-repo ()
+    "open remote repo URL"
+    (interactive)
+    (let ((url (magit-get "remote" "origin" "url")))
+      (progn
+        (browse-url (parse-url url))
+        (message "opening repo %s" url))))
+
+  (add-hook 'magit-mode-hook
+            (lambda ()
+              (local-set-key (kbd "o") 'magit-open-repo))))
+#+END_SRC
+
+** Diff
+#+BEGIN_SRC emacs-lisp
+(use-package magit-tbdiff
+  :ensure t
+  :after magit)
+#+END_SRC
+
+** git-todo
+#+BEGIN_SRC emacs-lisp
+(use-package magit-org-todos
+  :ensure t
+  :after magit
+  :config
+  (magit-org-todos-autoinsert))
+
+(use-package magit-todos
+  :ensure t
+  :commands (magit-todos-mode)
+  :hook (magit-mode . magit-todos-mode)
+  :config
+  (setq magit-todos-recursive t
+        magit-todos-depth 100)
+  :custom (magit-todos-keywords (list "TODO" "FIXME")))
+#+END_SRC
+
+** gitignore
 #+BEGIN_SRC emacs-lisp
 (use-package gitignore-mode
   :ensure t)
@@ -981,60 +1189,25 @@ See https://github.com/abo-abo/avy for more info
 (use-package helm-gitignore
   :ensure t)
 #+END_SRC
-* git
+** config edition 
 #+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :ensure t
-    :init
-    (progn
-    (bind-key "C-x g" 'magit-status)
-    ))
-
-    (use-package git-gutter
-    :ensure t
-    :init
-    (global-git-gutter-mode +1))
-
-    (global-set-key (kbd "M-g M-g") 'hydra-git-gutter/body)
-
-
-    (use-package git-timemachine
-    :ensure t
-    )
-  (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                              :hint nil)
-    "
-  Git gutter:
-    _j_: next hunk        _s_tage hunk     _q_uit
-    _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
-    ^ ^                   _p_opup hunk
-    _h_: first hunk
-    _l_: last hunk        set start _R_evision
-  "
-    ("j" git-gutter:next-hunk)
-    ("k" git-gutter:previous-hunk)
-    ("h" (progn (goto-char (point-min))
-                (git-gutter:next-hunk 1)))
-    ("l" (progn (goto-char (point-min))
-                (git-gutter:previous-hunk 1)))
-    ("s" git-gutter:stage-hunk)
-    ("r" git-gutter:revert-hunk)
-    ("p" git-gutter:popup-hunk)
-    ("R" git-gutter:set-start-revision)
-    ("q" nil :color blue)
-    ("Q" (progn (git-gutter-mode -1)
-                ;; git-gutter-fringe doesn't seem to
-                ;; clear the markup right away
-                (sit-for 0.1)
-                (git-gutter:clear))
-         :color blue))
-
-
-
+(use-package gitconfig-mode
+  :ensure t
+  :defer t
+  :mode
+  ("/\.gitconfig\'"    . gitconfig-mode)
+  ("/vcs/gitconfig\'"    . gitconfig-mode))
 #+END_SRC
+** Helpers for edition
+#+BEGIN_SRC emacs-lisp
+(use-package git-commit
+  :ensure t
+  :defer t)
 
-* Ispell
-*Source:*  
+(use-package gitattributes-mode
+  :ensure t
+  :defer t)
+#+END_SRC
 * windmove
 *Source:* [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's config]]
 #+BEGIN_SRC emacs-lisp
@@ -1183,10 +1356,10 @@ Spaceline is similar to the Spacemacs mode-line.
        (global-auto-complete-mode t)
       ))
   #+END_SRC
-* fill-column-indicator + column-enforce-mode
+* Fill-column-indicator + column-enforce-mode
 *Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package column-enforce-mode
   :ensure t
   :diminish column-enforce-mode
@@ -1201,8 +1374,7 @@ This package is similar to Column enforce mode but adds a line as a
 margin instead of being subtle. I make sure my code has a soft limit
 of 80 characters per line and a hard limit of 100 characters per line.
 Therefore I enable this for 80 characters and column enforce mode
-for 100. 
-
+for 100.
 
 #+BEGIN_SRC emacs-lisp
 (use-package fill-column-indicator
@@ -1212,98 +1384,6 @@ for 100.
   (setq fci-rule-width 5
         fci-rule-column 79))
 #+END_SRC
-* Theme
-** spacemacs-dark theme
-*Source*: [[https://github.com/nashamri/spacemacs-theme/issues/42][spacemacs-theme github]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package spacemacs-common
-    :ensure spacemacs-theme
-    :config (load-theme 'spacemacs-dark t))
-#+END_SRC
-** Solarized Light
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package solarized-theme :ensure t
-  :init (progn
-          (setq solarized-high-contrast-mode-line t
-                solarized-use-less-bold t
-                solarized-emphasize-indicators nil
-                solarized-scale-org-headlines nil
-                x-underline-at-descent-line t)
-          (load-theme 'solarized-light 'no-confirm))
-  :config (setq color-theme-is-global t))
-#+END_SRC
-
-** Monokai theme
-
-#+begin_src emacs-lisp :tangle no
-(use-package monokai-theme
-  :if (window-system)
-  :ensure t
-  :init
-  (setq monokai-use-variable-pitch nil))
-#+end_src
-
-** Cyberpunk theme
-
-The [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk theme]] is dark and colorful. However, I don't like the
-boxes around the mode line.
-
-#+begin_src emacs-lisp :tangle no
-(use-package cyberpunk-theme
-  :if (window-system)
-  :ensure t
-  :init
-  (progn
-    (load-theme 'cyberpunk t)
-    (set-face-attribute `mode-line nil
-                        :box nil)
-    (set-face-attribute `mode-line-inactive nil
-                        :box nil)))
-#+end_src
-
-I tend to switch themes more often than normal. For example, switching
-to a lighter theme (such as the default) or to a different theme
-depending on the time of day or my mood. Normally, switching themes is
-a multi-step process with ~disable-theme~ and ~load-theme~. The
-~switch-theme~ function will do that in one swoop. I just choose which
-theme I want to go to.
-
-** Waher theme
-
-#+begin_src emacs-lisp :tangle no
-(use-package waher-theme
-  if (window-system)
-  :ensure t
-  :init
-  (load-theme 'waher))
-#+end_src
-
-** Convenient theme functions
-
-#+begin_src emacs-lisp
-(defun switch-theme (theme)
-  "Disables any currently active themes and loads THEME."
-  ;; This interactive call is taken from `load-theme'
-  (interactive
-   (list
-    (intern (completing-read "Load custom theme: "
-                             (mapc 'symbol-name
-                                   (custom-available-themes))))))
-  (let ((enabled-themes custom-enabled-themes))
-    (mapc #'disable-theme custom-enabled-themes)
-    (load-theme theme t)))
-
-(defun disable-active-themes ()
-  "Disables any currently active themes listed in `custom-enabled-themes'."
-  (interactive)
-  (mapc #'disable-theme custom-enabled-themes))
-
-(bind-key "s-<f12>" 'switch-theme)
-(bind-key "s-<f11>" 'disable-active-themes)
-#+end_src
-
 * auto-mode-alist
 *Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
 #+BEGIN_SRC emacs-lisp

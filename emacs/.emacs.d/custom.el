@@ -12,7 +12,7 @@
  '(org-startup-folded 'overview)
  '(org-startup-indented t)
  '(package-selected-packages
-   '(ess planet-theme color-theme-wombat smart-mode-line yaml-mode markdown-mode move-text rainbow-mode monokai-theme counsel try use-package)))
+   '(gitattributes-mode gitconfig-mode magit-todos magit-org-todos magit-tbdiff ess planet-theme color-theme-wombat smart-mode-line yaml-mode markdown-mode move-text rainbow-mode monokai-theme counsel try use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

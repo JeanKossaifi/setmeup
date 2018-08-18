@@ -1,8 +1,8 @@
 # -*- mode: snippet -*-
-# name: title
+# name: startup
 # contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
 # contributor: Rafael Villarroel (rvf0068@gmail.com)
-# condition: (= (current-column) 5)
-# key: title
+# condition: (or (= (current-column) 3) (= (current-column) 0))
+# key: sta
 # --
-#+title: ${1:title}
+#+startup: ${1:options}

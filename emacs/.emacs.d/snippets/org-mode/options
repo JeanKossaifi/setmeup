@@ -1,8 +1,9 @@
 # -*- mode: snippet -*-
-# name: title
+# name: options
 # contributor : Rick Moynihan <rick@sourcesmouth.co.uk>
 # contributor: Rafael Villarroel (rvf0068@gmail.com)
-# condition: (= (current-column) 5)
-# key: title
+# binding: C-c y o
+# condition: (or (= (current-column) 3) (= (current-column) 0))
+# key: opt
 # --
-#+title: ${1:title}
+#+options: ${0}

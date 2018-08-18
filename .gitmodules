@@ -4,3 +4,6 @@
 [submodule "submodules/emacs/seblemaguer"]
 	path = submodules/emacs/seblemaguer
 	url = git@github.com:seblemaguer/dotfiles.git
+[submodule "submodules/emacs/yyr"]
+	path = submodules/emacs/yyr
+	url = https://github.com/yyr/emacs.d
