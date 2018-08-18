@@ -7,6 +7,7 @@
 #+STARTUP: overview
 
 * Repos
+
 #+BEGIN_SRC emacs-lisp
 (require 'package)
 (setq package-archives
@@ -17,12 +18,111 @@
   ("melpa" . "http://melpa.milkbox.net/packages/")
   ("marmalade" . "http://marmalade-repo.org/packages/")))
 #+END_SRC
+
 * global-vars
 *Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
 
 #+BEGIN_SRC emacs-lisp
 (defvar config-basedir "~/.emacs.d/")
 ;;(defvar orgfiles-basedir "~/")
+#+END_SRC
+  
+* company
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_QUOTE
+In order to have inline completion, really important for coding, I use company. However I adapted some facing attributes. Each language is also adding its backend when needed. Therefore, only global configuration here.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package company
+  :ensure t
+  :config
+  ;; Global
+  (setq company-idle-delay 1
+        company-minimum-prefix-length 1
+        company-show-numbers t
+        company-tooltip-limit 20)
+
+  ;; Facing
+  (unless (face-attribute 'company-tooltip :background)
+    (set-face-attribute 'company-tooltip nil :background "black" :foreground "gray40")
+    (set-face-attribute 'company-tooltip-selection nil :inherit 'company-tooltip :background "gray15")
+    (set-face-attribute 'company-preview nil :background "black")
+    (set-face-attribute 'company-preview-common nil :inherit 'company-preview :foreground "gray40")
+    (set-face-attribute 'company-scrollbar-bg nil :inherit 'company-tooltip :background "gray20")
+    (set-face-attribute 'company-scrollbar-fg nil :background "gray40"))
+
+  ;; Default backends
+  (setq company-backends '((company-files) (company-elisp)))
+
+  ;; Activating globally
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :ensure t
+  :after company
+  :config
+  (company-quickhelp-mode 1))
+#+END_SRC
+
+* Autocomplete
+  #+BEGIN_SRC emacs-lisp
+     (use-package auto-complete
+     :ensure t
+     :init
+     (progn
+     (ac-config-default)
+     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
+     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
+     ;;; activate, otherwise, auto-complete will
+     (ac-set-trigger-key "TAB")
+     (ac-set-trigger-key "<tab>")
+       (global-auto-complete-mode t)
+      ))
+  #+END_SRC
+
+* Yasnippet
+
+Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
+and have also modified them and added my own.
+
+It takes a few seconds to load and I don't need them immediately when
+Emacs starts up, so we can defer loading yasnippet until there's some
+idle time.
+
+Setting =yas-indent-line= to ='fixed= fixes Python indentation
+behavior when typing a templated snippet.
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :diminish yas-minor-mode
+  :config
+  ;; Adding yasnippet support to company
+  ;; (add-to-list 'company-backends '(company-yasnippet))
+
+  (setq ss/yas-snippets-dir (let ((dir (concat user-emacs-directory
+                                                   "snippets/")))
+                                  (make-directory dir :parents)
+                                  dir))
+  (setq yas-snippet-dirs (list 'ss/yas-snippets-dir))
+  (setq yas-indent-line 'fixed)
+(yas-global-mode))
+
+;; Preview yasnippet snippets with ivy.
+(use-package ivy-yasnippet
+  :ensure t
+  :after yasnippet)
+#+END_SRC
+
+We can use the default =yasnippet-snippets= after we have exhausted 
+the use of our customized snippets
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet
+  )
 #+END_SRC
 
 * myinit.org utils
@@ -190,6 +290,9 @@ customize settings in [[file:init.el][init.el]].
 ;; Get rus of messages
 (setq-default message-log-max nil)
 (kill-buffer "*Messages*")
+
+;; Restore previous emacs session
+;; (desktop-save-mode 1)
 #+end_src
 
 The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -229,6 +332,7 @@ Page-Breaks in GNU Emacs" by Eric J. M. Ritz.]]
     :ensure spacemacs-theme
     :config (load-theme 'spacemacs-dark t))
 #+END_SRC
+
 *** Solarized Light
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -504,31 +608,6 @@ creating a buffer to do some scratch work or reusing the initial
 (use-package scratch
   :ensure t
   :commands scratch)
-#+end_src
-* Yasnippet
-
-Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
-and have also modified them and added my own.
-
-It takes a few seconds to load and I don't need them immediately when
-Emacs starts up, so we can defer loading yasnippet until there's some
-idle time.
-
-Setting =yas-indent-line= to ='fixed= fixes Python indentation
-behavior when typing a templated snippet.
-
-#+begin_src emacs-lisp
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :config
-  (setq ss/yas-snippets-dir (let ((dir (concat user-emacs-directory
-                                                   "snippets/")))
-                                  (make-directory dir :parents)
-                                  dir))
-  (setq yas-snippet-dirs (list 'ss/yas-snippets-dir))
-  (setq yas-indent-line 'fixed)
-  (yas-global-mode))
 #+end_src
 * Recentf
 
@@ -1340,25 +1419,20 @@ Spaceline is similar to the Spacemacs mode-line.
 (add-hook 'org-mode-hook 'turn-on-flyspell)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 #+END_SRC
-  
-* Autocomplete
-  #+BEGIN_SRC emacs-lisp
-     (use-package auto-complete
-     :ensure t
-     :init
-     (progn
-     (ac-config-default)
-     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
-     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
-     ;;; activate, otherwise, auto-complete will
-     (ac-set-trigger-key "TAB")
-     (ac-set-trigger-key "<tab>")
-       (global-auto-complete-mode t)
-      ))
-  #+END_SRC
 * Fill-column-indicator + column-enforce-mode
 *Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
 
+** fill-column-indicator
+#+BEGIN_SRC emacs-lisp
+(use-package fill-column-indicator
+  :ensure t
+  :commands (fci-mode)
+  :init
+  (setq fci-rule-width 5
+        fci-rule-column 79))
+#+END_SRC
+
+** column-enforce-mode
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package column-enforce-mode
   :ensure t
@@ -1375,17 +1449,9 @@ margin instead of being subtle. I make sure my code has a soft limit
 of 80 characters per line and a hard limit of 100 characters per line.
 Therefore I enable this for 80 characters and column enforce mode
 for 100.
-
-#+BEGIN_SRC emacs-lisp
-(use-package fill-column-indicator
-  :ensure t
-  :commands (fci-mode)
-  :init
-  (setq fci-rule-width 5
-        fci-rule-column 79))
-#+END_SRC
 * auto-mode-alist
 *Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
 #+BEGIN_SRC emacs-lisp
 (setq auto-mode-alist
    (append (mapcar 'purecopy
