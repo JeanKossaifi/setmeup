@@ -27,7 +27,7 @@ elpa
 *.rel
 
 # AUCTeX auto folder
-/auto/
+auto/
 
 # cask packages
 .cask/
@@ -62,3 +62,4 @@ org-clock-save.el
 abbrev_defs
 .emacs.desktop
 custom.el
+url/

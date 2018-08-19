@@ -1,6 +1,6 @@
 # -*- mode: org -*-
-#+LANGUAGE:    en
 # -*- coding: utf-8 -*-
+#+LANGUAGE:    en
 #+NAME: Shamindra Shrotriya's emacs init org config
 #+EMAIL: shamindra.shrotriya@.gmail.com
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -26,64 +26,19 @@
 (defvar config-basedir "~/.emacs.d/")
 ;;(defvar orgfiles-basedir "~/")
 #+END_SRC
-  
-* company
-*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
 
-#+BEGIN_QUOTE
-In order to have inline completion, really important for coding, I use company. However I adapted some facing attributes. Each language is also adding its backend when needed. Therefore, only global configuration here.
-#+END_QUOTE
+* origami folding 
+*Source* [[printindex:https://github.com/zamansky/using-emacs/blob/master/myinit.org#origami-folding][zamansky's cool config]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package company
-  :ensure t
-  :config
-  ;; Global
-  (setq company-idle-delay 1
-        company-minimum-prefix-length 1
-        company-show-numbers t
-        company-tooltip-limit 20)
-
-  ;; Facing
-  (unless (face-attribute 'company-tooltip :background)
-    (set-face-attribute 'company-tooltip nil :background "black" :foreground "gray40")
-    (set-face-attribute 'company-tooltip-selection nil :inherit 'company-tooltip :background "gray15")
-    (set-face-attribute 'company-preview nil :background "black")
-    (set-face-attribute 'company-preview-common nil :inherit 'company-preview :foreground "gray40")
-    (set-face-attribute 'company-scrollbar-bg nil :inherit 'company-tooltip :background "gray20")
-    (set-face-attribute 'company-scrollbar-fg nil :background "gray40"))
-
-  ;; Default backends
-  (setq company-backends '((company-files) (company-elisp)))
-
-  ;; Activating globally
-  (global-company-mode t))
-
-(use-package company-quickhelp
-  :ensure t
-  :after company
-  :config
-  (company-quickhelp-mode 1))
+#+BEGIN_SRC emacs-lisp
+(use-package origami
+:ensure t)
 #+END_SRC
 
-* Autocomplete
-  #+BEGIN_SRC emacs-lisp
-     (use-package auto-complete
-     :ensure t
-     :init
-     (progn
-     (ac-config-default)
-     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
-     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
-     ;;; activate, otherwise, auto-complete will
-     (ac-set-trigger-key "TAB")
-     (ac-set-trigger-key "<tab>")
-       (global-auto-complete-mode t)
-      ))
-  #+END_SRC
-
 * Yasnippet
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
 
+#+BEGIN_QUOTE
 Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
 and have also modified them and added my own.
 
@@ -93,6 +48,7 @@ idle time.
 
 Setting =yas-indent-line= to ='fixed= fixes Python indentation
 behavior when typing a templated snippet.
+#+END_QUOTE
 
 #+begin_src emacs-lisp
 (use-package yasnippet
@@ -278,7 +234,18 @@ customize settings in [[file:init.el][init.el]].
 (global-visual-line-mode)
 (diminish 'visual-line-mode)
 
-(setq uniquify-buffer-name-style 'forward)
+;;(setq uniquify-buffer-name-style 'forward)
+(use-package uniquify
+  :config (setq uniquify-buffer-name-style 'forward))
+
+;; Save place in the file where we were previously
+;; Source: [[https://github.com/rejeep/emacs/blob/master/init.el#L103-L108][rejeep's config]]
+(use-package saveplace
+  :init (save-place-mode 1)
+  :config
+  (progn
+    (setq-default save-place t)
+    (setq save-place-limit nil)))
 
 ;; -i gets alias definitions from .bash_profile
 (setq shell-command-switch "-ic")
@@ -549,17 +516,21 @@ match the same one on macOS.
 (bind-key "C-c o t" 'open-dir-in-iterm)
 #+END_SRC
 
-* List buffers
+* buffers utils
+
+** List buffers
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
 
 ibuffer is the improved version of list-buffers.
 
+source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 #+begin_src emacs-lisp
 ;; make ibuffer the default buffer lister.
 (defalias 'list-buffers 'ibuffer)
 #+end_src
 
-source: http://ergoemacs.org/emacs/emacs_buffer_management.html
+
+source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]
 
 #+begin_src emacs-lisp
 (add-hook 'dired-mode-hook 'auto-revert-mode)
@@ -569,7 +540,33 @@ source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 (setq auto-revert-verbose nil)
 #+end_src
 
-source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]
+** Kill buffers
+*Source:* [[https://www.emacswiki.org/emacs/KillingBuffers][official emacs docs]] and [[https://www.emacswiki.org/emacs/RecentFiles#toc20][undo-kill-buffer]]
+
+#+BEGIN_SRC emacs-lisp
+ (defun kill-other-buffers ()
+      "Kill all other buffers."
+      (interactive)
+      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
+(defun undo-kill-buffer (arg)
+  "Re-open the last buffer killed.  With ARG, re-open the nth buffer."
+  (interactive "p")
+  (let ((recently-killed-list (copy-sequence recentf-list))
+	 (buffer-files-list
+	  (delq nil (mapcar (lambda (buf)
+			      (when (buffer-file-name buf)
+				(expand-file-name (buffer-file-name buf)))) (buffer-list)))))
+    (mapc
+     (lambda (buf-file)
+       (setq recently-killed-list
+	     (delq buf-file recently-killed-list)))
+     buffer-files-list)
+    (find-file
+     (if arg (nth arg recently-killed-list)
+       (car recently-killed-list)))))
+       (global-set-key (kbd "C-z") 'undo-kill-buffer) ;; Mapped to Ctrl-z
+#+END_SRC
 
 * Helm
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
@@ -1103,7 +1100,7 @@ See https://github.com/abo-abo/avy for more info
 
 
   (global-auto-revert-mode 1) ;; you might not want this
-  (setq auto-revert-verbose nil) ;; or this
+  ;; (setq auto-revert-verbose nil) ;; or this
 
   #+END_SRC
 
@@ -1469,22 +1466,64 @@ Spaceline is similar to the Spacemacs mode-line.
 #+END_SRC
 
 ** column-enforce-mode
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package column-enforce-mode
-  :ensure t
-  :diminish column-enforce-mode
-  :init
-  (setq column-enforce-column 99)
-  :config
-  (progn
-    (add-hook 'prog-mode-hook 'column-enforce-mode)))
-#+END_SRC
 
+#+BEGIN_QUOTE
 This package is similar to Column enforce mode but adds a line as a
 margin instead of being subtle. I make sure my code has a soft limit
 of 80 characters per line and a hard limit of 100 characters per line.
 Therefore I enable this for 80 characters and column enforce mode
 for 100.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp 
+(use-package column-enforce-mode
+  :ensure t
+  :diminish column-enforce-mode
+  :init
+  (setq column-enforce-column 79)
+  :config
+  (progn
+    (add-hook 'prog-mode-hook 'column-enforce-mode)))
+#+END_SRC
+
+* company
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_QUOTE
+In order to have inline completion, really important for coding, I use company. However I adapted some facing attributes. Each language is also adding its backend when needed. Therefore, only global configuration here.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package company
+  :ensure t
+  :config
+  ;; Global
+  (setq company-idle-delay 1
+        company-minimum-prefix-length 1
+        company-show-numbers t
+        company-tooltip-limit 20)
+
+  ;; Facing
+  (unless (face-attribute 'company-tooltip :background)
+    (set-face-attribute 'company-tooltip nil :background "black" :foreground "gray40")
+    (set-face-attribute 'company-tooltip-selection nil :inherit 'company-tooltip :background "gray15")
+    (set-face-attribute 'company-preview nil :background "black")
+    (set-face-attribute 'company-preview-common nil :inherit 'company-preview :foreground "gray40")
+    (set-face-attribute 'company-scrollbar-bg nil :inherit 'company-tooltip :background "gray20")
+    (set-face-attribute 'company-scrollbar-fg nil :background "gray40"))
+
+  ;; Default backends
+  (setq company-backends '((company-files) (company-elisp)))
+
+  ;; Activating globally
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :ensure t
+  :after company
+  :config
+  (company-quickhelp-mode 1))
+#+END_SRC
 * auto-mode-alist
 *Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
 
@@ -1504,7 +1543,24 @@ for 100.
         ("\\.mak" . makefile-mode)
         ("\\.py\\'" . python-mode)
         ("\\.cshrc" . sh-mode)
-        ("\\.emacs.d/snippets/" . snippet-mode)
+        ("\\snippets/" . snippet-mode)
         ("\\.html$" . html-mode)
 )) auto-mode-alist))
 #+END_SRC
+
+* Autocomplete
+  #+BEGIN_SRC emacs-lisp
+     (use-package auto-complete
+     :ensure t
+     :init
+     (progn
+     (ac-config-default)
+     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
+     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
+     ;;; activate, otherwise, auto-complete will
+     (add-to-list 'ac-modes 'org-mode)
+     (ac-set-trigger-key "TAB")
+     (ac-set-trigger-key "<tab>")
+       (global-auto-complete-mode t)
+      ))
+  #+END_SRC

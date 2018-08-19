@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# -*- mode: org -*-
+# -*- coding: utf-8 -*-
+# name: header1
+# key: head1
+# --
+#+STARTUP: overview indent inlineimages logdrawer
+#+TITLE:       Journal
+#+AUTHOR:      Shamindra Shrotriya
+#+LANGUAGE:    en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+COLUMNS: %25ITEM %TODO %3PRIORITY %TAGS
+#+SEQ_TODO: TODO(t!) STARTED(s!) WAITING(w!) APPT(a!) | DONE(d!) CANCELLED(c!) DEFERRED(f!)
+
+$0
