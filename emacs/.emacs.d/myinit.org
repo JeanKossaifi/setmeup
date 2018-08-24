@@ -19,170 +19,9 @@
   ("marmalade" . "http://marmalade-repo.org/packages/")))
 #+END_SRC
 
-* global-vars
-*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
-
-#+BEGIN_SRC emacs-lisp
-(defvar config-basedir "~/.emacs.d/")
-;;(defvar orgfiles-basedir "~/")
-#+END_SRC
-
-* origami folding 
-*Source* [[printindex:https://github.com/zamansky/using-emacs/blob/master/myinit.org#origami-folding][zamansky's cool config]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package origami
-:ensure t)
-#+END_SRC
-
-* Yasnippet
-*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
-
-#+BEGIN_QUOTE
-Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
-and have also modified them and added my own.
-
-It takes a few seconds to load and I don't need them immediately when
-Emacs starts up, so we can defer loading yasnippet until there's some
-idle time.
-
-Setting =yas-indent-line= to ='fixed= fixes Python indentation
-behavior when typing a templated snippet.
-#+END_QUOTE
-
-#+begin_src emacs-lisp
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :config
-  ;; Adding yasnippet support to company
-  ;; (add-to-list 'company-backends '(company-yasnippet))
-
-  (setq ss/yas-snippets-dir (let ((dir (concat user-emacs-directory
-                                                   "snippets/")))
-                                  (make-directory dir :parents)
-                                  dir))
-  (setq yas-snippet-dirs (list 'ss/yas-snippets-dir))
-  (setq yas-indent-line 'fixed)
-(yas-global-mode))
-
-;; Preview yasnippet snippets with ivy.
-(use-package ivy-yasnippet
-  :ensure t
-  :after yasnippet)
-#+END_SRC
-
-We can use the default =yasnippet-snippets= after we have exhausted 
-the use of our customized snippets
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package yasnippet-snippets
-  :ensure t
-  :after yasnippet
-  )
-#+END_SRC
-
-* myinit utils
-*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
-
-#+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-c i") 
-(lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
-#+END_SRC
-
-Shortcut to open the =init.org= file
-#+BEGIN_SRC emacs-lisp
-(defun find-config ()
-    "Edit config.org"
-    (interactive)
-    (find-file "~/.emacs.d/myinit.org"))
-
-  (global-set-key (kbd "C-c I") 'find-config) ;; Mapped to Ctrl-c Shift-i
-#+END_SRC
-* Personal Info
-
-#+begin_src emacs-lisp
-(setq user-full-name "Shamindra Shrotriya"
-      user-mail-address "shamindra.shrotriya@gmail.com")
-#+end_src
-
-* Flyspell
-*Source:* [[https://github.com/DiegoVicen/my-emacs/blob/master/README.org][DiegoVicen's config]]
-
-Just like =flycheck=, but it checks natural language in a text. Super useful
-for note taking and other text edition, specially if you use Emacs for
-everything like I do. =flyspell= is installed in new Emacs versions, but there
-are no completion tools by default in macOS, so we need to install the =aspell=
-engine by running =brew install aspell --with-lang-en=
-
-#+BEGIN_SRC sh :tangle no
-brew install aspell --with-lang-en
-#+END_SRC
-
-To make =flyspell= not clash with different syntax in the same file (like for
-example, LaTeX or =org-mode= one) we need the last hook message.
-
-#+BEGIN_SRC emacs-lisp :results silent
-(use-package flyspell
-  :ensure t
-  :config
-  (setq ispell-program-name "aspell"
-        ispell-dictionary "english")
-
-  (defun change-dictionary-spanish ()
-    (interactive)
-    (ispell-change-dictionary "espanol"))
-
-  (defun change-dictionary-english ()
-    (interactive)
-    (ispell-change-dictionary "english"))
-
-  :hook (org-mode . (lambda () (setq ispell-parser 'tex)))
-  :bind (:map flyspell-mode-map
-              ("C-c d s" . change-dictionary-spanish)
-              ("C-c d e" . change-dictionary-english)))
-#+END_SRC
-
-In case I am writing a text in a different language, I can just use =M-x
-ispell-change-dictionary=. Emacs seems to have a wide enough range of
-dictionaries preinstalled to suit my needs. Later in the configurations, hooks
-are added to each of the major-modes where I want =flyspell= to work.
-
-And this function prevents the spell checker to get inside source blocks in
-=org=.
-
-#+BEGIN_SRC emacs-lisp :results silent
-(defadvice org-mode-flyspell-verify (after org-mode-flyspell-verify-hack activate)
-  (let* ((rlt ad-return-value)
-         (begin-regexp "^[ \t]*#\\+begin_\\(src\\|html\\|latex\\|example\\|quote\\)")
-         (end-regexp "^[ \t]*#\\+end_\\(src\\|html\\|latex\\|example\\|quote\\)")
-         (case-fold-search t)
-         b e)
-    (when ad-return-value
-      (save-excursion
-        (setq b (re-search-backward begin-regexp nil t))
-        (if b (setq e (re-search-forward end-regexp nil t))))
-      (if (and b e (< (point) e)) (setq rlt nil)))
-    (setq ad-return-value rlt)))
-#+END_SRC
-
-* diminish
-
-#+BEGIN_SRC emacs-lisp
-(use-package diminish :ensure t)
-#+END_SRC
-
-* Customize settings
-*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
-
-Set up the customize file to its own separate file, instead of saving
-customize settings in [[file:init.el][init.el]].
-
-#+begin_src emacs-lisp
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(load custom-file)
-#+end_src
-
 * Sane defaults
+
+** Loading options
 *Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
 
 #+begin_src emacs-lisp
@@ -288,6 +127,254 @@ Page-Breaks in GNU Emacs" by Eric J. M. Ritz.]]
 #+begin_src emacs-lisp
 (use-package page-break-lines
   :ensure t)
+#+end_src
+
+** filename completion
+*Source:* [[http://endlessparentheses.com/improving-emacs-file-name-completion.html][endless parentheses blog]]
+
+#+BEGIN_SRC emacs-lisp
+(setq read-file-name-completion-ignore-case t)
+(setq read-buffer-completion-ignore-case t)
+(mapc (lambda (x)
+        (add-to-list 'completion-ignored-extensions x))
+      '(".aux" ".bbl" ".blg"
+        ".meta" ".out"
+        ".synctex.gz" ".tdo" ".toc"
+        "-pkg.el" "-autoloads.el"))
+#+END_SRC
+** electric pairs
+*Source:* [[http://prodissues.com/2016/10/electric-pair-mode-in-emacs.html][prodissues blog post]]
+
+Used to match paired delimiters
+#+BEGIN_SRC emacs-lisp :tangle no
+(electric-pair-mode 1)
+;; make electric-pair-mode work on more brackets
+(setq electric-pair-pairs '(
+                            (?\" . ?\")
+                            (?\{ . ?\})
+                            (?\[ . ?\])
+                            (?\< . ?\>)
+                            (?\* . ?\*)
+                            (?\= . ?\=)
+                            (?\/ . ?\/)
+                            ))
+
+(setq org-hide-emphasis-markers t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+* global-vars
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_SRC emacs-lisp
+(defvar config-basedir "~/.emacs.d/")
+;;(defvar orgfiles-basedir "~/")
+#+END_SRC
+
+* origami folding 
+*Source* [[printindex:https://github.com/zamansky/using-emacs/blob/master/myinit.org#origami-folding][zamansky's cool config]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package origami
+:ensure t)
+#+END_SRC
+
+* Yasnippet
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+#+BEGIN_QUOTE
+Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
+and have also modified them and added my own.
+
+It takes a few seconds to load and I don't need them immediately when
+Emacs starts up, so we can defer loading yasnippet until there's some
+idle time.
+
+Setting =yas-indent-line= to ='fixed= fixes Python indentation
+behavior when typing a templated snippet.
+#+END_QUOTE
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :diminish yas-minor-mode
+  :config
+  ;; Adding yasnippet support to company
+  ;; (add-to-list 'company-backends '(company-yasnippet))
+
+  (setq ss/yas-snippets-dir (let ((dir (concat user-emacs-directory
+                                                   "snippets/")))
+                                  (make-directory dir :parents)
+                                  dir))
+  (setq yas-snippet-dirs (list 'ss/yas-snippets-dir))
+  (setq yas-indent-line 'fixed)
+(yas-global-mode))
+
+;; Preview yasnippet snippets with ivy.
+(use-package ivy-yasnippet
+  :ensure t
+  :after yasnippet)
+#+END_SRC
+
+We can use the default =yasnippet-snippets= after we have exhausted 
+the use of our customized snippets
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet
+  )
+#+END_SRC
+
+* myinit utils
+*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c i") 
+(lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
+#+END_SRC
+
+Shortcut to open the =init.org= file
+#+BEGIN_SRC emacs-lisp
+(defun find-config ()
+    "Edit config.org"
+    (interactive)
+    (find-file "~/.emacs.d/myinit.org"))
+
+  (global-set-key (kbd "C-c I") 'find-config) ;; Mapped to Ctrl-c Shift-i
+#+END_SRC
+* Personal Info
+
+#+begin_src emacs-lisp
+(setq user-full-name "Shamindra Shrotriya"
+      user-mail-address "shamindra.shrotriya@gmail.com")
+#+end_src
+
+* Flyspell
+
+** Core flyspell setup
+*Source:* [[https://github.com/DiegoVicen/my-emacs/blob/master/README.org][DiegoVicen's config]]
+
+Just like =flycheck=, but it checks natural language in a text. Super useful
+for note taking and other text edition, specially if you use Emacs for
+everything like I do. =flyspell= is installed in new Emacs versions, but there
+are no completion tools by default in macOS, so we need to install the =aspell=
+engine by running =brew install aspell --with-lang-en=
+
+#+BEGIN_SRC sh :tangle no
+brew install aspell --with-lang-en
+#+END_SRC
+
+To make =flyspell= not clash with different syntax in the same file (like for
+example, LaTeX or =org-mode= one) we need the last hook message.
+
+#+BEGIN_SRC emacs-lisp :results silent
+(use-package flyspell
+  :ensure t
+  :config
+  (setq ispell-program-name "aspell"
+        ispell-dictionary "english")
+
+  (defun change-dictionary-spanish ()
+    (interactive)
+    (ispell-change-dictionary "espanol"))
+
+  (defun change-dictionary-english ()
+    (interactive)
+    (ispell-change-dictionary "english"))
+
+  :hook (org-mode . (lambda () (setq ispell-parser 'tex)))
+  :bind (:map flyspell-mode-map
+              ("C-c d s" . change-dictionary-spanish)
+              ("C-c d e" . change-dictionary-english)))
+#+END_SRC
+
+In case I am writing a text in a different language, I can just use =M-x
+ispell-change-dictionary=. Emacs seems to have a wide enough range of
+dictionaries preinstalled to suit my needs. Later in the configurations, hooks
+are added to each of the major-modes where I want =flyspell= to work.
+
+And this function prevents the spell checker to get inside source blocks in
+=org=.
+
+#+BEGIN_SRC emacs-lisp :results silent
+(defadvice org-mode-flyspell-verify (after org-mode-flyspell-verify-hack activate)
+  (let* ((rlt ad-return-value)
+         (begin-regexp "^[ \t]*#\\+begin_\\(src\\|html\\|latex\\|example\\|quote\\)")
+         (end-regexp "^[ \t]*#\\+end_\\(src\\|html\\|latex\\|example\\|quote\\)")
+         (case-fold-search t)
+         b e)
+    (when ad-return-value
+      (save-excursion
+        (setq b (re-search-backward begin-regexp nil t))
+        (if b (setq e (re-search-forward end-regexp nil t))))
+      (if (and b e (< (point) e)) (setq rlt nil)))
+    (setq ad-return-value rlt)))
+#+END_SRC
+
+** flyspell + abbrev autocorrect
+*Source:* [[http://endlessparentheses.com/improving-emacs-file-name-completion.html][endless parentheses blog]]
+
+#+BEGIN_SRC emacs-lisp
+(define-key ctl-x-map "\C-i"
+  #'endless/ispell-word-then-abbrev)
+
+(defun endless/simple-get-word ()
+  (car-safe (save-excursion (ispell-get-word nil))))
+
+(defun endless/ispell-word-then-abbrev (p)
+"Call `ispell-word', then create an abbrev for it.
+With prefix P, create local abbrev. Otherwise it will
+be global.
+If there's nothing wrong with the word at point, keep
+looking for a typo until the beginning of buffer. You can
+skip typos you don't want to fix with `SPC', and you can
+abort completely with `C-g'."
+  (interactive "P")
+  (let (bef aft)
+    (save-excursion
+      (while (if (setq bef (endless/simple-get-word))
+                 ;; Word was corrected or used quit.
+                 (if (ispell-word nil 'quiet)
+                     nil ; End the loop.
+                   ;; Also end if we reach `bob'.
+                   (not (bobp)))
+               ;; If there's no word at point, keep looking
+               ;; until `bob'.
+               (not (bobp)))
+        (backward-word)
+        (backward-char))
+      (setq aft (endless/simple-get-word)))
+    (if (and aft bef (not (equal aft bef)))
+        (let ((aft (downcase aft))
+              (bef (downcase bef)))
+          (define-abbrev
+            (if p local-abbrev-table global-abbrev-table)
+            bef aft)
+          (message "\"%s\" now expands to \"%s\" %sally"
+                   bef aft (if p "loc" "glob")))
+      (user-error "No typo at or before point"))))
+
+(setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
+#+END_SRC
+
+* diminish
+
+#+BEGIN_SRC emacs-lisp
+(use-package diminish :ensure t)
+#+END_SRC
+
+* Customize settings
+*Source*: [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai's config.org]]
+
+Set up the customize file to its own separate file, instead of saving
+customize settings in [[file:init.el][init.el]].
+
+#+begin_src emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file)
 #+end_src
 * Appearance
 ** Themes
@@ -818,6 +905,10 @@ Basically taken from =cocreature's= config with minimal modification.
   :ensure t
   :commands (org-bullets-mode)
   :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+;; Support shift selection in orgmode
+;; Source: [[https://www.reddit.com/r/emacs/comments/tbj09/using_shift_selection_in_orgmode_buffers_without/][this comment ]]
+(setq org-support-shift-select t)
 #+END_SRC
 
 ** live PDF updates in orgmode
@@ -884,7 +975,18 @@ When working on markdown or org-mode files that will be converted to PDF, I use 
 (eval-after-load 'markdown-mode
   '(define-key markdown-mode-map (kbd "C-c r") 'md-compile-and-update-other-buffer))
 #+END_SRC
-* Biblio-references
+** org-ellipsis 
+*Source:* [[http://endlessparentheses.com/improving-emacs-file-name-completion.html][endless parentheses blog]]
+
+Nice to put a space before the symbol for clarity
+#+BEGIN_SRC emacs-lisp
+(setq org-ellipsis " ⤵")
+;;(setq org-ellipsis " ▼")
+;;(setq org-ellipsis " ↴")
+;;(setq org-ellipsis " ⋱")
+#+END_SRC
+
+* Biblio-references + org-ref
 *Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1032,7 +1134,7 @@ See https://github.com/abo-abo/avy for more info
       :init
       (global-flycheck-mode t))
   #+END_SRC
-* Python
+* Python2
 *Source:* Taylor Pospisil's config (communicated personally)
   #+BEGIN_SRC emacs-lisp
     (use-package python
@@ -1058,6 +1160,8 @@ See https://github.com/abo-abo/avy for more info
 #+END_SRC
 
 * Undo Tree
+More natural undo or redo. Undo with =C-/= and redo with =C-?=
+
   #+BEGIN_SRC emacs-lisp
     (use-package undo-tree
       :ensure t
@@ -1266,6 +1370,31 @@ See https://github.com/abo-abo/avy for more info
   (add-hook 'magit-mode-hook
             (lambda ()
               (local-set-key (kbd "o") 'magit-open-repo))))
+#+END_SRC
+** magit fullscreen
+*Source:* [[http://whattheemacsd.com/][Magnar Sveen's useful blog]] 
+
+#+BEGIN_QUOTE
+This code makes magit-status run alone in the frame, and then restores the old window configuration when you quit out of magit.
+
+No more juggling windows after commiting. It's magit bliss.
+#+END_QUOTE
+
+#+begin_SRC emacs-lisp
+;; full screen magit-status
+
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :magit-fullscreen))
+
+(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
 #+END_SRC
 
 ** Diff
@@ -1563,4 +1692,10 @@ In order to have inline completion, really important for coding, I use company. 
      (ac-set-trigger-key "<tab>")
        (global-auto-complete-mode t)
       ))
+
+;; Add hook for python mode
+;; *Source:* [[https://github.com/auto-complete/auto-complete/issues/357][auto-complete python]]
+(defun my-python-mode-hook ()
+  (push 'ac-source-yasnippet ac-sources))
+(add-hook 'python-mode-hook 'my-python-mode-hook)
   #+END_SRC

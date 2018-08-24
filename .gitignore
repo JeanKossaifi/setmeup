@@ -63,3 +63,5 @@ abbrev_defs
 .emacs.desktop
 custom.el
 url/
+places
+eshell
