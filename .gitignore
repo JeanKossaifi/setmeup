@@ -57,6 +57,9 @@ myinit.pdf
 myinit.tex
 # we may have another folder named bookmarks, so only ignore the emacs-specific one
 emacs/.emacs.d/bookmarks
+emacs/.emacs.d/.emacs.desktop.lock
+emacs/.emacs.d/elfeed/
+emacs/.emacs.d/saveplace.el
 network-security.data
 org-clock-save.el
 abbrev_defs

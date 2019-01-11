@@ -63,26 +63,34 @@
 
 ; Highlights the current cursor line
 (global-hl-line-mode t)
-(setq global-linum-mode t)
 
 (show-paren-mode t)
 
 ;;(line-number-mode 1)
 (column-number-mode t)
+;; (global-linum-mode t)
 
 (global-visual-line-mode)
 (diminish 'visual-line-mode)
 
 ;;(setq uniquify-buffer-name-style 'forward)
 (use-package uniquify
-  :config (setq uniquify-buffer-name-style 'forward))
+  :config
+  (setq uniquify-buffer-name-style 'forward)
+  (setq uniquify-separator "/")
+  ;; rename after killing uniquified
+  (setq uniquify-after-kill-buffer-p t)
+  ;; don't muck with special buffers
+  (setq uniquify-ignore-buffers-re "^\\*"))
 
 ;; Save place in the file where we were previously
 ;; Source: [[https://github.com/rejeep/emacs/blob/master/init.el#L103-L108][rejeep's config]]
+;; Source: [[Ac:https://github.com/bamos/dotfiles/blob/master/.emacs.d.old/init.el#L80]]
 (use-package saveplace
   :init (save-place-mode 1)
   :config
   (progn
+  (setq save-place-file (concat user-emacs-directory "saveplace.el") )
     (setq-default save-place t)
     (setq save-place-limit nil)))
 
@@ -98,7 +106,11 @@
 (kill-buffer "*Messages*")
 
 ;; Restore previous emacs session
-;; (desktop-save-mode 1)
+(desktop-save-mode 1)
+
+;; full-screen mode
+(custom-set-variables
+ '(initial-frame-alist (quote ((fullscreen . maximized)))))
 #+end_src
 
 The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -119,6 +131,18 @@ at point as the default value for occur.
 
 (bind-key "M-s o" 'occur-dwim)
 #+end_src
+
+We can install aggressive indent mode
+Source: [[https://github.com/codahale/emacs.d/blob/master/init.el#L79-L85][Coda Hale's dotfiles]]
+#+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (global-aggressive-indent-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'web-mode))
+#+END_SRC
 
 Here we make page-break characters look pretty, instead of appearing
 as =^L= in Emacs. [[http://ericjmritz.name/2015/08/29/using-page-breaks-in-gnu-emacs/][Here's an informative article called "Using
@@ -158,12 +182,128 @@ Used to match paired delimiters
                             (?\= . ?\=)
                             (?\/ . ?\/)
                             ))
-
-(setq org-hide-emphasis-markers t)
 #+END_SRC
 
 #+RESULTS:
 : t
+** match parentheses
+*Source:* 
+#+BEGIN_SRC emacs-lisp
+(defun xah-insert-bracket-pair (@left-bracket @right-bracket &optional @wrap-method)
+  "Insert brackets around selection, word, at point, and maybe move cursor in between.
+
+ *left-bracket and *right-bracket are strings. *wrap-method must be either 'line or 'block. 'block means between empty lines.
+
+• if there's a region, add brackets around region.
+• If *wrap-method is 'line, wrap around line.
+• If *wrap-method is 'block, wrap around block.
+• if cursor is at beginning of line and its not empty line and contain at least 1 space, wrap around the line.
+• If cursor is at end of a word or buffer, one of the following will happen:
+ xyz▮ → xyz(▮)
+ xyz▮ → (xyz▮)       if in one of the lisp modes.
+• wrap brackets around word if any. e.g. xy▮z → (xyz▮). Or just (▮)
+
+URL `http://ergoemacs.org/emacs/elisp_insert_brackets_by_pair.html'
+Version 2017-01-17"
+  (if (use-region-p)
+      (progn ; there's active region
+        (let (
+              ($p1 (region-beginning))
+              ($p2 (region-end)))
+          (goto-char $p2)
+          (insert @right-bracket)
+          (goto-char $p1)
+          (insert @left-bracket)
+          (goto-char (+ $p2 2))))
+    (progn ; no text selection
+      (let ($p1 $p2)
+        (cond
+         ((eq @wrap-method 'line)
+          (setq $p1 (line-beginning-position) $p2 (line-end-position))
+          (goto-char $p2)
+          (insert @right-bracket)
+          (goto-char $p1)
+          (insert @left-bracket)
+          (goto-char (+ $p2 (length @left-bracket))))
+         ((eq @wrap-method 'block)
+          (save-excursion
+            (progn
+              (if (re-search-backward "\n[ \t]*\n" nil 'move)
+                  (progn (re-search-forward "\n[ \t]*\n")
+                         (setq $p1 (point)))
+                (setq $p1 (point)))
+              (if (re-search-forward "\n[ \t]*\n" nil 'move)
+                  (progn (re-search-backward "\n[ \t]*\n")
+                         (setq $p2 (point)))
+                (setq $p2 (point))))
+            (goto-char $p2)
+            (insert @right-bracket)
+            (goto-char $p1)
+            (insert @left-bracket)
+            (goto-char (+ $p2 (length @left-bracket)))))
+         ( ;  do line. line must contain space
+          (and
+           (eq (point) (line-beginning-position))
+           ;; (string-match " " (buffer-substring-no-properties (line-beginning-position) (line-end-position)))
+           (not (eq (line-beginning-position) (line-end-position))))
+          (insert @left-bracket )
+          (end-of-line)
+          (insert  @right-bracket))
+         ((and
+           (or ; cursor is at end of word or buffer. i.e. xyz▮
+            (looking-at "[^-_[:alnum:]]")
+            (eq (point) (point-max)))
+           (not (or
+                 (string-equal major-mode "xah-elisp-mode")
+                 (string-equal major-mode "emacs-lisp-mode")
+                 (string-equal major-mode "lisp-mode")
+                 (string-equal major-mode "lisp-interaction-mode")
+                 (string-equal major-mode "common-lisp-mode")
+                 (string-equal major-mode "clojure-mode")
+                 (string-equal major-mode "xah-clojure-mode")
+                 (string-equal major-mode "scheme-mode"))))
+          (progn
+            (setq $p1 (point) $p2 (point))
+            (insert @left-bracket @right-bracket)
+            (search-backward @right-bracket )))
+         (t (progn
+              ;; wrap around “word”. basically, want all alphanumeric, plus hyphen and underscore, but don't want space or punctuations. Also want chinese chars
+              ;; 我有一帘幽梦，不知与谁能共。多少秘密在其中，欲诉无人能懂。
+              (skip-chars-backward "-_[:alnum:]")
+              (setq $p1 (point))
+              (skip-chars-forward "-_[:alnum:]")
+              (setq $p2 (point))
+              (goto-char $p2)
+              (insert @right-bracket)
+              (goto-char $p1)
+              (insert @left-bracket)
+              (goto-char (+ $p2 (length @left-bracket))))))))))
+
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+;; Define the matching pairs
+(defun xah-insert-paren () (interactive) (xah-insert-bracket-pair "(" ")") )
+(defun xah-insert-bracket () (interactive) (xah-insert-bracket-pair "[" "]") )
+(defun xah-insert-brace () (interactive) (xah-insert-bracket-pair "{" "}") )
+(defun xah-insert-curly-single-quote () (interactive) (xah-insert-bracket-pair "'" "'"))
+(defun xah-insert-curly-double-quote () (interactive) (xah-insert-bracket-pair "\"" "\""))
+(defun xah-insert-verbatim () (interactive) (xah-insert-bracket-pair "=" "="))
+(defun xah-insert-ast () (interactive) (xah-insert-bracket-pair "*" "*"))
+(defun xah-insert-fwd-slash () (interactive) (xah-insert-bracket-pair "/" "/"))
+
+(global-set-key (kbd "M-{") 'xah-insert-brace) ; {}
+(global-set-key (kbd "M-(") 'xah-insert-paren) ; ()
+(global-set-key (kbd "M-[") 'xah-insert-bracket) ; []
+(global-set-key (kbd "M-'") 'xah-insert-curly-single-quote) ; ''
+(global-set-key (kbd "M-C-'") 'xah-insert-curly-double-quote) ; ""
+(global-set-key (kbd "M-v") 'xah-insert-verbatim) ; ==
+(global-set-key (kbd "M-b") 'xah-insert-ast) ; **
+(global-set-key (kbd "M-/") 'xah-insert-fwd-slash) ; //
+#+END_SRC
+
+#+RESULTS:
+: xah-insert-fwd-slash
 
 * global-vars
 *Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
@@ -173,6 +313,24 @@ Used to match paired delimiters
 ;;(defvar orgfiles-basedir "~/")
 #+END_SRC
 
+* hippie-expand
+=M-x hippie-expand= is a single command providing a variety of completions and
+expansions. The following code segment comes from [[https://github.com/bbatsov/prelude][Emacs Prelude]].
+
+This is sourced from [[https://github.com/xiaohanyu/oh-my-emacs/blob/master/core/ome-completion.org#hippie-expand][Xiao Hanyu's ome setup]]
+#+BEGIN_SRC emacs-lisp
+;; hippie expand is dabbrev expand on steroids
+(setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                         try-expand-dabbrev-all-buffers
+                                         try-expand-dabbrev-from-kill
+                                         try-complete-file-name-partially
+                                         try-complete-file-name
+                                         try-expand-all-abbrevs
+                                         try-expand-list
+                                         try-expand-line
+                                         try-complete-lisp-symbol-partially
+                                         try-complete-lisp-symbol))
+#+END_SRC
 * origami folding 
 *Source* [[printindex:https://github.com/zamansky/using-emacs/blob/master/myinit.org#origami-folding][zamansky's cool config]]
 
@@ -231,7 +389,7 @@ the use of our customized snippets
 *Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
 
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-c i") 
+(global-set-key (kbd "C-c e") 
 (lambda() (interactive)(org-babel-load-file "~/.emacs.d/myinit.org")))
 #+END_SRC
 
@@ -701,7 +859,11 @@ Display recent files used - makes it really quick to load them this way.
   :bind ("C-x C-r" . helm-recentf)
   :config
   (recentf-mode t)
-  (setq recentf-max-saved-items 200))
+  (setq recentf-max-saved-items 200
+        recentf-max-menu-items 15
+        ;; disable recentf-cleanup on Emacs start, because it can cause
+        ;; problems with remote files
+        recentf-auto-cleanup 'never))
 #+end_src
 
 * which key
@@ -867,24 +1029,24 @@ Basically taken from =cocreature's= config with minimal modification.
   (progn
     ;; The GTD part of this config is heavily inspired by
     ;; https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
-    (setq org-directory "~/DROPBOX/REPOS/ss_orgfiles")
+    (setq org-directory "~/DROPBOX/REPOS/ss_personal_orgfiles")
     (setq org-agenda-files
           (mapcar (lambda (path) (concat org-directory path))
-                  '("/todo.org"
-                    "/journal.org")))
+                  '("/mytodo.org"
+                    "/myjournal.org")))
     (setq org-log-done 'time)
     (setq org-src-fontify-natively t)
     (setq org-use-speed-commands t)
     (setq org-capture-templates
           '(("j" "Journal" entry
-             (file+headline "~/DROPBOX/REPOS/ss_orgfiles/journal.org" "Journal Entries")
+             (file+headline "~/DROPBOX/REPOS/ss_personal_orgfiles/myjournal.org" "Journal Entries")
              "* %i%?")
             ("t" "Todo [Inbox]" entry
-             (file+headline "~/DROPBOX/REPOS/ss_orgfiles/todo.org" "TODOs")
+             (file+headline "~/DROPBOX/REPOS/ss_personal_orgfiles/mytodo.org" "TODOs")
              "* TODO %i%? \n %^t")))
     (setq org-refile-targets
-          '(("~/DROPBOX/REPOS/ss_orgfiles/todo.org" :maxlevel . 3)))
-    (setq org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+          '(("~/DROPBOX/REPOS/ss_personal_orgfiles/mytodo.org" :maxlevel . 3)))
+    (setq org-todo-keywords '((sequence "TODO(t)"  "WAITING(w)" "|" "NEXT(n)" "|" "DONE(d)" "CANCELLED(c)")))
     (setq org-agenda-custom-commands
           '(("@" "Contexts"
              ((tags-todo "@email"
@@ -909,7 +1071,14 @@ Basically taken from =cocreature's= config with minimal modification.
 ;; Support shift selection in orgmode
 ;; Source: [[https://www.reddit.com/r/emacs/comments/tbj09/using_shift_selection_in_orgmode_buffers_without/][this comment ]]
 (setq org-support-shift-select t)
+
+;; Hide markup elements in org-mode
+;; Source:  https://stackoverflow.com/questions/10969617/hiding-markup-elements-in-org-mode
+(setq org-hide-emphasis-markers t)
 #+END_SRC
+
+#+RESULTS:
+: t
 
 ** live PDF updates in orgmode
 *Source:* [[https://github.com/munen/emacs.d/#convenience-functions-when-working-with-pdf-exports][munen's awesome config]]
@@ -993,11 +1162,11 @@ Nice to put a space before the symbol for clarity
 (use-package ivy-bibtex
   :ensure t
   :config
-  (setq ivy-bibtex-bibliography "~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib" ;; where your references are stored
-        ivy-bibtex-library-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/lib/" ;; where your pdfs etc are stored
-        ivy-bibtex-notes-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org" ;; where your notes are stored
-        bibtex-completion-bibliography "~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib" ;; writing completion
-        bibtex-completion-notes-path "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org"))
+  (setq ivy-bibtex-bibliography "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/refs.bib" ;; where your references are stored
+        ivy-bibtex-library-path "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/lib/" ;; where your pdfs etc are stored
+        ivy-bibtex-notes-path "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/notes.org" ;; where your notes are stored
+        bibtex-completion-bibliography "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/refs.bib" ;; writing completion
+        bibtex-completion-notes-path "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/notes.org"))
 
 (use-package org-ref
   :after org
@@ -1006,10 +1175,10 @@ Nice to put a space before the symbol for clarity
   ;;(("uu"  . org-ref-cite-hydra/body))
   :init
   (setq org-ref-completion-library 'org-ref-ivy-cite
-        org-ref-notes-directory "~/DROPBOX/REPOS/ss_orgfiles/biblio"
-        org-ref-bibliography-notes "~/DROPBOX/REPOS/ss_orgfiles/biblio/notes.org"
-        org-ref-default-bibliography '("~/DROPBOX/REPOS/ss_orgfiles/biblio/refs.bib")
-        org-ref-pdf-directory "~/DROPBOX/REPOS/ss_orgfiles/biblio/lib/")
+        org-ref-notes-directory "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio"
+        org-ref-bibliography-notes "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/notes.org"
+        org-ref-default-bibliography '("~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/refs.bib")
+        org-ref-pdf-directory "~/DROPBOX/REPOS/ss_personal_orgfiles/biblio/lib/")
 
   :config
   (add-hook 'org-export-before-parsing-hook 'orcp-citeproc))
@@ -1021,6 +1190,21 @@ Nice to put a space before the symbol for clarity
   (setq interleave-split-direction 'horizontal
         interleave-split-lines 20
         interleave-disable-narrowing t))
+#+END_SRC
+
+* Cooking with org-recipe
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+#+BEGIN_SRC emacs-lisp
+  (use-package org-chef
+    :ensure t
+    :config
+    (add-to-list 'org-capture-templates
+                 '("c" "Cookbook" entry (file "~/DROPBOX/REPOS/ss_personal_orgfiles/myrecipes.org")
+                   "%(org-chef-get-recipe-from-url)"
+                   :empty-lines 1))
+    (add-to-list 'org-capture-templates
+                  '("m" "Manual Cookbook" entry (file "~/DROPBOX/REPOS/ss_personal_orgfiles/myrecipes.org")
+                  "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Directions\n\n")))
 #+END_SRC
 
 * Ace windows for easy window switching
@@ -1040,7 +1224,7 @@ Nice to put a space before the symbol for clarity
 
 * ido mode
 This is sourced from: [[rmail:https://benaiah.me/posts/using-ido-emacs-completion/][benaiah mischenko's setup]]
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package ido                        ; Better minibuffer completion
   :init (progn
           (ido-mode)
@@ -1283,6 +1467,309 @@ More natural undo or redo. Undo with =C-/= and redo with =C-?=
 #+END_SRC
 
 #+RESULTS
+* elfeed
+** Hydra elfeed setup
+[[https://github.com/skeeto/elfeed][Elfeed]] is an extensible web feed reader for Emacs, supporting both Atom and RSS
+Source: [[https://github.com/joedicastro/dotfiles/tree/master/emacs/.emacs.d#elfeed][Joe Dicastro's dotfiles]]
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package elfeed
+  :ensure t
+  :commands elfeed
+  :config
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :before "1 weeks ago"
+                                :remove 'unread))
+  (setq elfeed-db-directory  (concat user-emacs-directory "elfeed")
+        ;elfeed-search-filter "@1-weeks-old +unread "
+        elfeed-search-title-max-width 80)
+  (setq elfeed-feeds
+        '(
+          ("http://cstheory-feed.org/atom.xml" cstheory)
+          ("http://www.offconvex.org/feed.xml" mltheory)
+          ("http://export.arxiv.org/rss/stat.TH" arxiv stats)
+          ("https://andrewgelman.com/feed/" stats blog)
+          ("http://feeds2.feedburner.com/MachineLearningtheory" mltheory blog)
+          ("http://www.masteringemacs.org/feed/" emacs)))
+  (bind-keys :map elfeed-search-mode-map
+             ("a"   .  elfeed-search-update--force)
+             ("A"   .  elfeed-update)
+             ("d"   .  elfeed-unjam)
+             ("o"   .  elfeed-search-browse-url)
+             ("j"   .  next-line)
+             ("k"   .  previous-line)
+             ("g"   .  beginning-of-buffer)
+             ("G"   .  end-of-buffer)
+             ("v"   .  set-mark-command)
+             ("<escape>" .  keyboard-quit))
+  (bind-keys :map elfeed-show-mode-map
+             ("j"     . elfeed-show-next)
+             ("k"     . elfeed-show-prev)
+             ("o"     . elfeed-show-visit)
+             ("<escape>" .  keyboard-quit)
+             ("SPC"   . scroll-up)
+             ("S-SPC" . scroll-down)
+             ("TAB"   . shr-next-link)
+             ("S-TAB" . shr-previous-link))
+
+  (when (package-installed-p 'hydra)
+      (bind-keys :map elfeed-search-mode-map
+             ("\\"   . hydra-elfeed-search/body))
+      (bind-keys :map elfeed-show-mode-map
+             ("\\"   . hydra-elfeed-show/body))
+      (eval-and-compile
+        (defhydra hydra-elfeed-common (:color blue)
+          ("\\" hydra-master/body "back")
+          ("<ESC>" nil "quit")))
+
+      (defhydra hydra-elfeed-search (:hint nil :color blue :inherit (hydra-elfeed-common/heads))
+        "
+                                                                      ╭────────┐
+  Move   Filter     Entries        Tags          Do                   │ Elfeed │
+╭─────────────────────────────────────────────────────────────────────┴────────╯
+  _p_/_k_    [_s_] live   [_RET_] view     [_r_] read      [_a_] refresh
+  ^ ^↑^ ^    [_S_] set    [_o_] browse     [_u_] unread    [_A_] fetch
+  ^ ^ ^ ^     ^ ^         [_y_] yank url   [_+_] add       [_d_] unjam
+  ^ ^↓^ ^     ^ ^         [_v_] mark       [_-_] remove    [_E_] edit feeds
+  _n_/_j_     ^ ^          ^ ^              ^ ^            [_q_] exit
+--------------------------------------------------------------------------------
+        "
+        ("q"    quit-window)
+        ("a"    elfeed-search-update--force)
+        ("A"    elfeed-update)
+        ("d"    elfeed-unjam)
+        ("s"    elfeed-search-live-filter)
+        ("S"    elfeed-search-set-filter)
+        ("RET"  elfeed-search-show-entry)
+        ("o"    elfeed-search-browse-url)
+        ("y"    elfeed-search-yank)
+        ("v"    set-mark-command)
+        ("n"    next-line :color red)
+        ("j"    next-line :color red)
+        ("p"    previous-line :color red)
+        ("k"    previous-line :color red)
+        ("r"    elfeed-search-untag-all-unread)
+        ("u"    elfeed-search-tag-all-unread)
+        ("E"    (lambda() (interactive)(find-file "~/.emacs.d/elfeed.el.gpg")))
+        ("+"    elfeed-search-tag-all)
+        ("-"    elfeed-search-untag-all))
+
+    (defhydra hydra-elfeed-show (:hint nil :color blue)
+        "
+                                                                      ╭────────┐
+  Scroll       Entries        Tags          Links                     │ Elfeed │
+╭─────────────────────────────────────────────────────────────────────┴────────╯
+  _S-SPC_    _p_/_k_  [_g_] refresh   [_u_] unread    _S-TAB_
+  ^  ↑  ^    ^ ^↑^ ^  [_o_] browse    [_+_] add       ^  ↑  ^
+  ^     ^    ^ ^ ^ ^  [_y_] yank url  [_-_] remove    ^     ^
+  ^  ↓  ^    ^ ^↓^ ^  [_q_] quit       ^ ^            ^  ↓  ^
+   _SPC_     _n_/_j_  [_s_] quit & search^^            _TAB_
+--------------------------------------------------------------------------------
+        "
+        ("q"     elfeed-kill-buffer)
+        ("g"     elfeed-show-refresh)
+        ("n"     elfeed-show-next :color red)
+        ("j"     elfeed-show-next :color red)
+        ("p"     elfeed-show-prev :color red)
+        ("k"     elfeed-show-prev :color red)
+        ("s"     elfeed-show-new-live-search)
+        ("o"     elfeed-show-visit)
+        ("y"     elfeed-show-yank)
+        ("u"     (elfeed-show-tag 'unread))
+        ("+"     elfeed-show-tag)
+        ("-"     elfeed-show-untag)
+        ("SPC"   scroll-up :color red)
+        ("S-SPC" scroll-down :color red)
+        ("TAB"   shr-next-link :color red)
+        ("S-TAB" shr-previous-link :color red))))
+#+END_SRC
+
+#+RESULTS:
+: t
+** Mike Zamansky's elfeed setup
+#+BEGIN_SRC emacs-lisp :tangle no
+(setq elfeed-db-directory  (concat user-emacs-directory "elfeed")
+        ;elfeed-search-filter "@1-weeks-old +unread "
+        elfeed-search-title-max-width 80)
+   ; (setq elfeed-db-directory "~/Sync/shared/elfeeddb")
+
+    (defun elfeed-mark-all-as-read ()
+	  (interactive)
+	  (mark-whole-buffer)
+	  (elfeed-search-untag-all-unread))
+
+    ;;functions to support syncing .elfeed between machines
+    ;;makes sure elfeed reads index from disk before launching
+    (defun bjm/elfeed-load-db-and-open ()
+      "Wrapper to load the elfeed db from disk before opening"
+      (interactive)
+      (elfeed-db-load)
+      (elfeed)
+      (elfeed-search-update--force))
+
+    ;;write to disk when quiting
+    (defun bjm/elfeed-save-db-and-bury ()
+      "Wrapper to save the elfeed db to disk before burying buffer"
+      (interactive)
+      (elfeed-db-save)
+      (quit-window))
+
+    (use-package elfeed
+      :ensure t
+      :bind (:map elfeed-search-mode-map
+		  ("q" . bjm/elfeed-save-db-and-bury)
+		  ("Q" . bjm/elfeed-save-db-and-bury)
+		  ("m" . elfeed-toggle-star)
+		  ("M" . elfeed-toggle-star)
+		  ("j" . mz/make-and-run-elfeed-hydra)
+		  ("J" . mz/make-and-run-elfeed-hydra)
+		  )
+       :config
+    (defalias 'elfeed-toggle-star
+      (elfeed-expose #'elfeed-search-toggle-all 'star)))
+
+    (use-package elfeed-goodies
+      :ensure t
+      :config
+      (elfeed-goodies/setup))
+
+    (use-package elfeed-org
+      :ensure t
+      :config
+      (elfeed-org)
+      (setq rmh-elfeed-org-files (list "~/DROPBOX/REPOS/ss_personal_orgfiles/myelfeed.org")))
+
+  (defun z/hasCap (s) ""
+	 (let ((case-fold-search nil))
+	 (string-match-p "[[:upper:]]" s)
+	 ))
+
+  (defun z/get-hydra-option-key (s)
+    "returns single upper case letter (converted to lower) or first"
+    (interactive)
+    (let ( (loc (z/hasCap s)))
+      (if loc
+	  (downcase (substring s loc (+ loc 1)))
+	(substring s 0 1)
+      )))
+
+  ;;  (active blogs cs eDucation emacs local misc sports star tech unread webcomics)
+  (defun mz/make-elfeed-cats (tags)
+    "Returns a list of lists. Each one is line for the hydra configuratio in the form
+       (c function hint)"
+    (interactive)
+    (mapcar (lambda (tag)
+	      (let* (
+		     (tagstring (symbol-name tag))
+		     (c (z/get-hydra-option-key tagstring))
+		     )
+		(list c (append '(elfeed-search-set-filter) (list (format "@6-months-ago +%s" tagstring) ))tagstring  )))
+	    tags))
+  
+  (defmacro mz/make-elfeed-hydra ()
+    `(defhydra mz/hydra-elfeed ()
+       "filter"
+       ,@(mz/make-elfeed-cats (elfeed-db-get-all-tags))
+       ("*" (elfeed-search-set-filter "@6-months-ago +star") "Starred")
+       ("M" elfeed-toggle-star "Mark")
+       ("A" (elfeed-search-set-filter "@6-months-ago") "All")
+       ("T" (elfeed-search-set-filter "@1-day-ago") "Today")
+       ("Q" bjm/elfeed-save-db-and-bury "Quit Elfeed" :color blue)
+       ("q" nil "quit" :color blue)
+       ))
+
+    (defun mz/make-and-run-elfeed-hydra ()
+      ""
+      (interactive)
+      (mz/make-elfeed-hydra)
+      (mz/hydra-elfeed/body))
+#+END_SRC
+** Marcel van der Boom's elfeed/ elfeed.org setup
+*** Marcel van der Boom's elfeed setup
+[[https://github.com/skeeto/elfeed][Elfeed]] is an extensible web feed reader for Emacs, supporting both Atom and RSS
+Source: [[https://github.com/mrvdb/emacs-config/blob/master/mrb.org#elfeed][Marcel van der Boom's setup]]
+#+BEGIN_SRC emacs-lisp
+(use-package notifications)
+
+(use-package elfeed
+  :after notifications
+  :commands elfeed
+  :bind (("C-c f" . 'elfeed)
+         :map elfeed-show-mode-map
+         ("w" . 'mrb/elfeed-show-toggle-watchlater)
+         ("v" . 'mrb/elfeed-play-with-mpv)
+         :map elfeed-search-mode-map
+         ("w" . 'mrb/elfeed-search-toggle-watchlater))
+  :init
+  (setf url-queue-timeout 30)
+  (setq elfeed-db-directory  (concat user-emacs-directory "elfeed")
+        ;elfeed-search-filter "@1-weeks-old +unread "
+        elfeed-search-title-max-width 80)
+
+  :config
+  (defun mrb/elfeed-search-toggle-tag(tag)
+    (let ((entries (elfeed-search-selected)))
+      (cl-loop for entry in entries do
+               (if (elfeed-tagged-p tag entry)
+                   (elfeed-untag entry tag)
+                 (elfeed-tag entry tag)))
+      (mapc #'elfeed-search-update-entry entries)
+      (unless (use-region-p) (forward-line))))
+
+  (defun mrb/elfeed-search-togggle-watchlater()
+    (mrb/elfeed-search-toggle-tag 'watchlater))
+
+  (defun mrb/elfeed-show-toggle-tag(tag)
+    (interactive)
+    (if (elfeed-tagged-p tag elfeed-show-entry)
+        (elfeed-show-untag tag)
+      (elfeed-show-tag tag)))
+
+  (defun mrb/elfeed-show-togggle-watchlater()
+    (mrb/elfeed-show-toggle-tag 'watchlater))
+
+  ;; TODO: mrb/elfeed-enqueue-video
+  (defun mrb/elfeed-play-with-mpv ()
+    "Play elfeed link in mpv"
+    (interactive)
+    (notifications-notify
+     :title "Elfeed action"
+     :body "Playing video with MPV"
+     :app-name "Elfeed")
+
+    (start-process "elfeed-mpv" nil
+                   "umpv"
+                   (elfeed-entry-link elfeed-show-entry)))
+
+
+  ;; New entry hook allows meta information manipulation
+  ;; without directly having to change elfeed-feeds
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :feed-url "youtube\\.com"
+                                :add '(video youtube)))
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :feed-url "vimeo\\.com"
+                                :add '(video vimeo))))
+#+END_SRC
+
+*** Marcel van der Boom's elfeed.org setup
+[[https://github.com/skeeto/elfeed][Elfeed]] is an extensible web feed reader for Emacs, supporting both Atom and RSS
+Source: [[https://github.com/mrvdb/emacs-config/blob/master/mrb.org#elfeed][Marcel van der Boom's setup
+]]
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package elfeed-goodies
+      :ensure t
+      :config
+      (elfeed-goodies/setup))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+
+(use-package elfeed-org
+  :ensure t
+  :config
+  (elfeed-org)
+  (setq rmh-elfeed-org-files (list "~/DROPBOX/REPOS/ss_personal_orgfiles/myelfeed.org")))
+#+END_SRC
 * git
 *Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
 ** Global
@@ -1450,13 +1937,35 @@ No more juggling windows after commiting. It's magit bliss.
   :defer t)
 #+END_SRC
 * windmove
+** Core windmove setup
 *Source:* [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's config]]
+
 #+BEGIN_SRC emacs-lisp
 (use-package windmove
   :config
   ;; use shift + arrow keys to switch between visible buffers
   (windmove-default-keybindings))
 #+END_SRC
+
+** Org-mode rebindings for windmove 
+*Source:* raxod502's [[https://github.com/bbatsov/prelude/issues/665#issuecomment-273865182][recommendation for rebindings]]
+*TODO*: Look into rebindings for =org-agenda-mode= as seen [[https://github.com/bbatsov/prelude/issues/665][here]]. This was
+put in but no longer working.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+;; org-mode rebindingsraxod502's recommendation per the source
+(with-eval-after-load 'org
+
+  ;; Prevent Org from overriding the bindings for windmove.
+  (define-key org-mode-map (kbd "S-<left>") nil)
+  (define-key org-mode-map (kbd "S-<right>") nil)
+  (define-key org-mode-map (kbd "S-<up>") nil)
+  (define-key org-mode-map (kbd "S-<down>") nil))
+#+END_SRC
+
+#+RESULTS:
+: org-agenda-do-date-later
+
 * markdown-mode
 *Source:* [[https://github.com/bbatsov/emacs.d/blob/master/init.el][bbatsov's config]]
 #+BEGIN_SRC emacs-lisp
@@ -1525,6 +2034,139 @@ Spaceline is similar to the Spacemacs mode-line.
   (progn
     (powerline-default-theme)))
 #+END_SRC
+* Hooks
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook 'turn-on-flyspell)
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+* Fill-column-indicator + column-enforce-mode
+*Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
+
+** fill-column-indicator
+#+BEGIN_SRC emacs-lisp
+(use-package fill-column-indicator
+  :ensure t
+  :commands (fci-mode)
+  :init
+  (setq fci-rule-width 5
+        fci-rule-column 79))
+#+END_SRC
+
+** column-enforce-mode
+
+#+BEGIN_QUOTE
+This package is similar to Column enforce mode but adds a line as a
+margin instead of being subtle. I make sure my code has a soft limit
+of 80 characters per line and a hard limit of 100 characters per line.
+Therefore I enable this for 80 characters and column enforce mode
+for 100.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp 
+(use-package column-enforce-mode
+  :ensure t
+  :diminish column-enforce-mode
+  :init
+  (setq column-enforce-column 79)
+  :config
+  (progn
+    (add-hook 'prog-mode-hook 'column-enforce-mode)))
+#+END_SRC
+* company
+*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
+
+#+BEGIN_QUOTE
+In order to have inline completion, really important for coding, I use company. However I adapted some facing attributes. Each language is also adding its backend when needed. Therefore, only global configuration here.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package company
+  :ensure t
+  :config
+  ;; Global
+  (setq company-idle-delay 1
+        company-minimum-prefix-length 1
+        company-show-numbers t
+        company-tooltip-limit 20)
+
+  ;; Facing
+  (unless (face-attribute 'company-tooltip :background)
+    (set-face-attribute 'company-tooltip nil :background "black" :foreground "gray40")
+    (set-face-attribute 'company-tooltip-selection nil :inherit 'company-tooltip :background "gray15")
+    (set-face-attribute 'company-preview nil :background "black")
+    (set-face-attribute 'company-preview-common nil :inherit 'company-preview :foreground "gray40")
+    (set-face-attribute 'company-scrollbar-bg nil :inherit 'company-tooltip :background "gray20")
+    (set-face-attribute 'company-scrollbar-fg nil :background "gray40"))
+
+  ;; Default backends
+  (setq company-backends '((company-files) (company-elisp)))
+
+  ;; Activating globally
+  (global-company-mode t))
+
+(use-package company-quickhelp
+  :ensure t
+  :after company
+  :config
+  (company-quickhelp-mode 1))
+#+END_SRC
+* auto-mode-alist
+
+*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
+
+#+BEGIN_SRC emacs-lisp
+(setq auto-mode-alist
+   (append (mapcar 'purecopy
+      '(
+        ("\\.org$" . org-mode)
+        ("\\.el$"  . emacs-lisp-mode)
+        ("emacs"  . emacs-lisp-mode)
+        ("\\.md\\'" . markdown-mode)
+        ("\\.tex$" . LaTeX-mode)
+        ("\\.txi$" . Texinfo-mode)
+        ("[mM]akefile" . makefile-mode)
+        ("[mM]akefile.*" . makefile-mode)
+        ("\\.mk\\'" . makefile-mode)
+        ("\\.mak" . makefile-mode)
+        ("\\.py\\'" . python-mode)
+        ("\\.cshrc" . sh-mode)
+        ("\\snippets/" . snippet-mode)
+        ("\\.html$" . html-mode)
+)) auto-mode-alist))
+#+END_SRC
+* Save State
+*Source*: [[https://github.com/tonini/emacs.d/blob/master/init.el#L309-L317][tonini's config]]
+
+These are mostly utilities that help save the state of buffers during
+a session and when you return to a session.
+
+#+BEGIN_SRC emacs-lisp
+(use-package winner                     ; Undo and redo window configurations
+  :init (winner-mode))
+#+END_SRC
+
+* Autocomplete
+  #+BEGIN_SRC emacs-lisp
+     (use-package auto-complete
+     :ensure t
+     :init
+     (progn
+     (ac-config-default)
+     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
+     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
+     ;;; activate, otherwise, auto-complete will
+     (add-to-list 'ac-modes 'org-mode)
+     (ac-set-trigger-key "TAB")
+     (ac-set-trigger-key "<tab>")
+       (global-auto-complete-mode t)
+      ))
+
+;; Add hook for python mode
+;; *Source:* [[https://github.com/auto-complete/auto-complete/issues/357][auto-complete python]]
+(defun my-python-mode-hook ()
+  (push 'ac-source-yasnippet ac-sources))
+(add-hook 'python-mode-hook 'my-python-mode-hook)
+  #+END_SRC
 * latex
 *Source:* [[https://github.com/SteveLane/dot-emacs/blob/master/packages-latex.el][Steve Lane's config]]
 
@@ -1576,126 +2218,31 @@ Spaceline is similar to the Spacemacs mode-line.
   (add-hook 'bibtex-mode-hook 'turn-on-auto-revert-mode)
   )
 #+END_SRC
-* Hooks
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-mode-hook 'turn-on-flyspell)
-(add-hook 'org-mode-hook 'turn-on-auto-fill)
-#+END_SRC
-* Fill-column-indicator + column-enforce-mode
-*Source:* [[https://sriramkswamy.github.io/dotemacs/#orgheadline253][sriramkswamy's config]]
 
-** fill-column-indicator
-#+BEGIN_SRC emacs-lisp
-(use-package fill-column-indicator
-  :ensure t
-  :commands (fci-mode)
-  :init
-  (setq fci-rule-width 5
-        fci-rule-column 79))
-#+END_SRC
+The following is the autocomplete settings for LaTeX [[id:https://emacs.stackexchange.com/questions/5938/how-to-make-auto-complete-work-in-auctex-mode][from this post]]
 
-** column-enforce-mode
+ #+BEGIN_SRC emacs-lisp
+;; auto-complete setup, sequence is important
+;;(require 'auto-complete)
+(add-to-list 'ac-modes 'latex-mode) ; beware of using 'LaTeX-mode instead
 
-#+BEGIN_QUOTE
-This package is similar to Column enforce mode but adds a line as a
-margin instead of being subtle. I make sure my code has a soft limit
-of 80 characters per line and a hard limit of 100 characters per line.
-Therefore I enable this for 80 characters and column enforce mode
-for 100.
-#+END_QUOTE
+(use-package ac-math
+      :ensure t)
 
-#+BEGIN_SRC emacs-lisp 
-(use-package column-enforce-mode
-  :ensure t
-  :diminish column-enforce-mode
-  :init
-  (setq column-enforce-column 79)
-  :config
-  (progn
-    (add-hook 'prog-mode-hook 'column-enforce-mode)))
-#+END_SRC
-
-* company
-*Source:* [[https://github.com/seblemaguer/dotfiles/blob/1571e39f7b325a34f6f5bb07bdca06acd30fb714/emacs.d/init.el#L58][seblemaguer's config]]
-
-#+BEGIN_QUOTE
-In order to have inline completion, really important for coding, I use company. However I adapted some facing attributes. Each language is also adding its backend when needed. Therefore, only global configuration here.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package company
-  :ensure t
-  :config
-  ;; Global
-  (setq company-idle-delay 1
-        company-minimum-prefix-length 1
-        company-show-numbers t
-        company-tooltip-limit 20)
-
-  ;; Facing
-  (unless (face-attribute 'company-tooltip :background)
-    (set-face-attribute 'company-tooltip nil :background "black" :foreground "gray40")
-    (set-face-attribute 'company-tooltip-selection nil :inherit 'company-tooltip :background "gray15")
-    (set-face-attribute 'company-preview nil :background "black")
-    (set-face-attribute 'company-preview-common nil :inherit 'company-preview :foreground "gray40")
-    (set-face-attribute 'company-scrollbar-bg nil :inherit 'company-tooltip :background "gray20")
-    (set-face-attribute 'company-scrollbar-fg nil :background "gray40"))
-
-  ;; Default backends
-  (setq company-backends '((company-files) (company-elisp)))
-
-  ;; Activating globally
-  (global-company-mode t))
-
-(use-package company-quickhelp
-  :ensure t
-  :after company
-  :config
-  (company-quickhelp-mode 1))
-#+END_SRC
-* auto-mode-alist
-*Source*: [[http://mescal.imag.fr/membres/arnaud.legrand/misc/init.php][Arnaud Legrand's customization]]
-
-#+BEGIN_SRC emacs-lisp
-(setq auto-mode-alist
-   (append (mapcar 'purecopy
-      '(
-        ("\\.org$" . org-mode)
-        ("\\.el$"  . emacs-lisp-mode)
-        ("emacs"  . emacs-lisp-mode)
-        ("\\.md\\'" . markdown-mode)
-        ("\\.tex$" . LaTeX-mode)
-        ("\\.txi$" . Texinfo-mode)
-        ("[mM]akefile" . makefile-mode)
-        ("[mM]akefile.*" . makefile-mode)
-        ("\\.mk\\'" . makefile-mode)
-        ("\\.mak" . makefile-mode)
-        ("\\.py\\'" . python-mode)
-        ("\\.cshrc" . sh-mode)
-        ("\\snippets/" . snippet-mode)
-        ("\\.html$" . html-mode)
-)) auto-mode-alist))
-#+END_SRC
-
-* Autocomplete
-  #+BEGIN_SRC emacs-lisp
-     (use-package auto-complete
-     :ensure t
-     :init
-     (progn
-     (ac-config-default)
-     ;;; set the trigger key so hat it can work together with yasnippet on tab key,
-     ;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
-     ;;; activate, otherwise, auto-complete will
-     (add-to-list 'ac-modes 'org-mode)
-     (ac-set-trigger-key "TAB")
-     (ac-set-trigger-key "<tab>")
-       (global-auto-complete-mode t)
-      ))
-
-;; Add hook for python mode
-;; *Source:* [[https://github.com/auto-complete/auto-complete/issues/357][auto-complete python]]
-(defun my-python-mode-hook ()
-  (push 'ac-source-yasnippet ac-sources))
-(add-hook 'python-mode-hook 'my-python-mode-hook)
-  #+END_SRC
+;; (require 'ac-math) ; package should be installed first 
+(defun my-ac-latex-mode () ; add ac-sources for latex
+   (setq ac-sources
+         (append '(ac-source-math-unicode
+           ac-source-math-latex
+           ac-source-latex-commands)
+                 ac-sources)))
+(add-hook 'LaTeX-mode-hook 'my-ac-latex-mode)
+(setq ac-math-unicode-in-math-p t)
+(ac-flyspell-workaround) ; fixes a known bug of delay due to flyspell (if it is there)
+(add-to-list 'ac-modes 'org-mode) ; auto-complete for org-mode (optional)
+(require 'auto-complete-config) ; should be after add-to-list 'ac-modes and hooks
+(ac-config-default)
+(setq ac-auto-start nil)            ; if t starts ac at startup automatically
+(setq ac-auto-show-menu t)
+(global-auto-complete-mode t) 
+ #+END_SRC
