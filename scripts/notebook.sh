@@ -6,19 +6,19 @@ echo "*****************************************************"
 cat << EOF
 usage: $0 [-r] [-t token]
 
-This script starts a jupyter notebook.
+This script starts a jupyter lab.
 
 TYPICAL USE:
 	$0
 
-	This will start a jupyter notebook, killing existing ones if needed
+	This will start a jupyter lab, killing existing ones if needed
 
 BASIC OPTIONS:
    -h         Show this message
 
    -r         A random token will be used
 
-   -k		  Kill existing notebook processes
+   -k		  Kill existing lab processes
 
    -t [token] Use the given token
 EOF
@@ -62,23 +62,23 @@ echo "http://localhost:8888/"
 echo "ssh -nNT -L 8888:127.0.0.1:8888 ubuntu@$PUBLIC_HOST"
 
 if [[ ($kill_existing == 1) ]]; then
-	if [ "$(ps ax | grep jupyter-notebook | wc -l)" -gt 0 ]; then
-		echo "Killing previous notebook servers"
-		killall jupyter-notebook
-		echo "Waiting 5 seconds for old processes to shut down"
-		sleep 5
-	fi
+	#if [ "$(ps ax | grep jupyter-lab | wc -l)" -gt 0 ]; then
+	#	echo "Killing previous lab servers"
+	killall jupyter-lab
+#		echo "Waiting 5 seconds for old processes to shut down"
+	sleep 5
+#	fi
 fi
 
-echo "Launching notebook..."
+echo "Launching lab..."
 # ip=127.0.0.1 means that it can only be reached from localhost.
 if [[ ($use_token == 1) ]]; then
-	echo "Starting notebook with the given token"
-    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1 --NotebookApp.token="${token}"
+	echo "Starting lab with the given token"
+    jupyter lab --port=8888 --port-retries=0 --ip=127.0.0.1 --labApp.token="${token}"
 elif [[ ($use_token == 2) ]]; then
-	echo "Starting notebook with a randomly generated token"
-    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1
+	echo "Starting lab with a randomly generated token"
+    jupyter lab --port=8888 --port-retries=0 --ip=127.0.0.1
 else
-	echo "Starting notebook with no token"
-    jupyter notebook --port=8888 --port-retries=0 --ip=127.0.0.1  --NotebookApp.token=''
+	echo "Starting lab with no token"
+    jupyter lab --port=8888 --port-retries=0 --ip=127.0.0.1  --labApp.token=''
 fi

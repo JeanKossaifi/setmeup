@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 clear
 
 usage()
@@ -25,6 +25,7 @@ BASIC OPTIONS:
 
 ADVANCED OPTIONS:
    -c         Copy the files rather than creating symbolic links.
+   -a	      (AMAZON) Use this if you are setting up an EC2 instance
 
 By Jean KOSSAIFI <jean [dot] kossaifi [at] gmail.com>
 EOF
@@ -32,7 +33,8 @@ echo "*****************************************************"
 }
 
 COPY_FILES=0;
-while getopts "hc" OPTION;
+AMZ=0;
+while getopts "hca" OPTION;
 do
 	case $OPTION in
 		h|\?)
@@ -41,15 +43,17 @@ do
 			;;
 		c) COPY_FILES=1
 			;;
+		a) AMZ=1
+			;;
 	esac
 done
 
 if [ $COPY_FILES -eq 1 ]
 then
-	echo "\n** Configuration files will be copied.. **."
+	printf "\n** Configuration files will be copied.. **."
 	CPY='cp -r'
 else
-	echo "\n** Configuration files will be symbolic links.. **."
+	printf "\n** Configuration files will be symbolic links.. **."
 	CPY='ln -sf'
 fi
 
@@ -58,7 +62,7 @@ if [[ `uname` == 'Darwin' ]]; then
 fi
 
 # Remove existing configs
-echo '\n** Preparing install **'
+printf '\n** Preparing install **'
 rm $HOME/.tmux.conf
 rm $HOME/.zshrc
 rm $HOME/.vimrc
@@ -79,8 +83,8 @@ $CPY $PWD/zsh $HOME/.zsh
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
 echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
-export PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
-export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH >> $HOME/.local_zshrc
+echo PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
+echo PYTHONPATH=$HOME/anaconda3/bin:$PYTHONPATH >> $HOME/.local_zshrc
 
 ############### VIM ###############################
 # For the doc vim/nvim plugin
@@ -96,7 +100,7 @@ text='"""
 """'
 
 # Vim configuration
-echo '\n** Configuring vim **'
+printf '\n** Configuring vim **'
 mkdir $HOME/.vim
 $CPY $PWD/vim/settings.vim $HOME/.vim/settings.vim
 $CPY $PWD/vim/keybindings.vim $HOME/.vim/keybindings.vim
@@ -106,19 +110,25 @@ vim +PlugInstall +qall
 echo "$text" > $HOME/.vim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
 # Neo-vim configuration
-echo '\n** Configuring neo-vim **'
-mkdir -p $HOME/.config/nvim
-$CPY $PWD/vim/nvimrc $HOME/.config/nvim/init.vim
-$CPY $PWD/vim/settings.vim $HOME/.config/nvim/settings.vim
-$CPY $PWD/vim/keybindings.vim $HOME/.config/nvim/keybindings.vim
-curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-nvim +PlugInstall +qall
-# Modify the default docstring
-echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
+NEOVIM_PATH=`which nvim`
+if [ -z "$NEOVIM_PATH" ];
+then
+	printf "\nNeo-vim not installed..."
+else
+	printf '\n** Configuring neo-vim **'
+	mkdir -p $HOME/.config/nvim
+	$CPY $PWD/vim/nvimrc $HOME/.config/nvim/init.vim
+	$CPY $PWD/vim/settings.vim $HOME/.config/nvim/settings.vim
+	$CPY $PWD/vim/keybindings.vim $HOME/.config/nvim/keybindings.vim
+	curl -fLo $HOME/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	nvim +PlugInstall +qall
+	# Modify the default docstring
+	echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
+fi
 
 ########### SETUP SHELL #####################
 . ./setup_shell.sh
 
 # Yay!
-echo '\n\n*** Congratulations! You are all set up!! ***\n'
+printf '\n\n*** Congratulations! You are all set up!! ***\n'
 
