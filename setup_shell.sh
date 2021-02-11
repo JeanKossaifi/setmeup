@@ -1,7 +1,19 @@
 SHELL_NAME=zsh
+# Path to xonsh
+#SHELL_BIN_PATH=`which $SHELL_NAME`
+# The above is not portable, see
+# https://github.com/ohmyzsh/ohmyzsh/issues/3300
+SHELL_BIN_PATH=$(grep /zsh$ /etc/shells | tail -1)
+if [ -z "$SHELL_BIN_PATH" ]
+then 
+	echo "$SHELL_NAME is not in /etc/shells, trying to add it"
+	echo "${SHELL_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
+fi
+
+echo "Using $SHELL_NAME in path $SHELL_BIN_PATH, current shell=$SHELL"
 # If not installed, install it
 printf "\n** Checking that you are using the correct shell.. **.\n"
-if ! command -v $SHELL_NAME &> /dev/null;
+if [ -z "$(command -v $SHELL_BIN_PATH)" ] 
 then
 	echo "  !!!WARNING !!!"
     echo "    $SHELL_NAME is not installed... Install it or suffer bash"
@@ -13,22 +25,20 @@ else
 	echo "    $SHELL_NAME detected"
 fi
 
-# Path to xonsh
-SHELL_BIN_PATH=`which $SHELL_NAME`
-echo "Using $SHELL_NAME in path $SHELL_BIN_PATH, current shell=$SHELL"
-echo "${SHELL_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
 
 # # Set as default
+SYSTEM="`uname`"
 echo "** Setting $SHELL_NAME as default **"
-if [ -z "$SHELL -c 'echo $SHELL_BIN_PATH'" ];
+#if [ -z "$SHELL -c 'echo $SHELL_BIN_PATH'" ]
+if [ "$SHELL" = "$SHELL_BIN_PATH" ];
 then
-    echo "   # $SHELL_NAMEis already the default"
+    echo "    $SHELL_NAME is already the default"
 else
-   if [ `uname` == 'Linux' ]; then
+	if [ "$SYSTEM" = 'Linux' ]; then
 	   echo "   # Current shell is not zsh, changing it. Please enter password."
 	   # chsh -s ${SHELL_BIN_PATH} $whoami
 	   chsh -s ${SHELL_BIN_PATH}
-   elif [ `uname` == 'Darwin' ]; then
+   elif [ "`uname`" = 'Darwin' ]; then
 	   echo "   # Current shell is not zsh, changing it. Please enter password."
 	   chsh -s ${SHELL_BIN_PATH}
    fi
