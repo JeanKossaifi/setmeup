@@ -1,6 +1,8 @@
 Repository to set up my configurations
 ======================================
 
+Sets up the shell, vim, tmux, etc, all locally without any need for root.
+
 Installation
 ------------
 

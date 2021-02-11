@@ -53,6 +53,10 @@ else
 	CPY='ln -sf'
 fi
 
+if [[ `uname` == 'Darwin' ]]; then
+	. ./setup_brews.sh
+fi
+
 # Remove existing configs
 echo '\n** Preparing install **'
 rm $HOME/.tmux.conf
@@ -67,7 +71,7 @@ rm -rf $HOME/.zsh
 # Copy conf files (symlinks)
 $CPY $PWD/tmux/tmux.conf $HOME/.tmux.conf
 $CPY $PWD/pypirc $HOME/.pypirc
-$CPY $PWD/zshrc $HOME/.zshrc
+$CPY $PWD/zsh/zshrc $HOME/.zshrc
 $CPY $PWD/vim/vimrc $HOME/.vimrc
 $CPY $PWD/gitconfig $HOME/.gitconfig
 $CPY $PWD/zsh $HOME/.zsh
@@ -78,6 +82,7 @@ echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
 export PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
 export PYTHONPATH=$HOME/anaconda/bin:$PYTHONPATH >> $HOME/.local_zshrc
 
+############### VIM ###############################
 # For the doc vim/nvim plugin
 # We want numpy docs
 text='"""
@@ -111,30 +116,9 @@ nvim +PlugInstall +qall
 # Modify the default docstring
 echo "$text" > $HOME/.config/nvim/plugged/vim-pydocstring/template/pydocstring/multi.txt
 
-# If zsh is not default, make it the default
-ZSH_BIN_PATH=`which zsh`
-echo "\n** Checking you are using the correct shell.. **."
-if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ];
-then
-    echo "   # Good, you are already using zsh"
-else
-    echo "   # Current shell is not zsh, changing it. Please enter password."
-	if [[ `uname` == 'Linux' ]]; then
-		chsh -s ${ZSH_BIN_PATH}
-	elif [[ `uname` == 'Darwin' ]]; then
-		echo "${ZSH_BIN_PATH}" | sudo tee -a /etc/shells > /dev/null
-		chsh -s ${ZSH_BIN_PATH}
-	fi
-fi
-
-# Add auto-suggestion
-# echo '\n\n*** zsh auto-suggestion ***\n'
-# git clone git://github.com/zsh-users/zsh-autosuggestions ~/.zsh/zsh-autosuggestions
-# echo "source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.local_zshrc
-# echo "bindkey '^ ' autosuggest-accept" >> ~/.local_zshrc
-
+########### SETUP SHELL #####################
+. ./setup_shell.sh
 
 # Yay!
 echo '\n\n*** Congratulations! You are all set up!! ***\n'
-
 

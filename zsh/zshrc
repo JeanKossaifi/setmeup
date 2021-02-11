@@ -40,8 +40,6 @@ else
     elif [[ `uname` == 'Darwin' ]]; then
         alias ls="ls -G"
         export PLATFORM="osx"
-        # export PATH=$HOME/anaconda/bin:$PATH
-        # export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda3/bin:$PYTHONPATH
     fi
 	export ZSH_BIN_PATH=`which zsh`
 fi
@@ -57,8 +55,8 @@ fi
 
 # Path
 source $HOME/.local_zshrc
-export PATH=$HOME/anaconda/bin:$PATH
-export PYTHONPATH=$HOME/mxnet//python:$HOME/anaconda/bin:$PYTHONPATH
+export PATH=$HOME/anaconda3/bin:$PATH
+export PYTHONPATH=$HOME/anaconda3/bin:$PYTHONPATH
 
 # Key maps
 if [ -n "$terminfo[kcuu1]" ]; then
@@ -83,7 +81,7 @@ alias mkdir='nocorrect mkdir'
 # e.g. typing test.py will execute python test.py
 alias -s py="python"
 alias -s tex="mkpdf -vs -n"
-alias -s unpushed="!GIT_CURRENT_BRANCH=$(git name-rev --name-only HEAD) && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline"
+alias -s unpushed="!GIT_CURRENT_BRANCH=\$(git name-rev --name-only HEAD) && git log origin/\$GIT_CURRENT_BRANCH..\$GIT_CURRENT_BRANCH --oneline"
 alias -g ...='../..'
 alias -g ....='../../..'
 alias -g .....='../../../..'
@@ -127,9 +125,24 @@ over_ssh() {
     fi
 }
 
-
 source $HOME/.zsh/colours.zsh
 source $HOME/.zsh/window_title.zsh
 source $HOME/.zsh/completion.zsh
 source $HOME/.zsh/prompt.zsh
 source $HOME/.local_zshrc
+
+# # >>> conda initialize >>>
+# # !! Contents within this block are managed by 'conda init' !!
+# __conda_setup="$('/Users/jean/opt/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/Users/jean/opt/anaconda3/etc/profile.d/conda.sh" ]; then
+#         . "/Users/jean/opt/anaconda3/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/Users/jean/opt/anaconda3/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
+# # <<< conda initialize <<<
+

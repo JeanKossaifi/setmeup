@@ -5,7 +5,7 @@
 """ Map leader and escape
 let mapleader="\\"
 " Other options: ",", "-"
-inoremap hh <ESC>
+" inoremap hh <ESC>
 inoremap kj <ESC>
 
 " Copy and paste from the clipboard

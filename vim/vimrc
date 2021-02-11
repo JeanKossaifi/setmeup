@@ -9,8 +9,16 @@ set nocompatible
 " Add the plugins
 call plug#begin('~/.vim/plugged')
 
+	" Icons for plugins 
+	Plug 'ryanoasis/vim-devicons'
+
+	" Nice color theme
+	Plug 'sainnhe/sonokai'
+
     " Git plugin: Gstatus, Gedit, Gdiff
-    Plug 'tpope/vim-fugitive'
+    " Plug 'tpope/vim-fugitive'
+	" Gutter
+	" Plug 'airblade/vim-gitgutter'
     
     " gundo, displays undo tree
     Plug 'sjl/gundo.vim'
@@ -24,7 +32,9 @@ call plug#begin('~/.vim/plugged')
     Plug 'scrooloose/nerdtree'
     
     " Air-line
-    Plug 'vim-airline/vim-airline'
+    " Plug 'vim-airline/vim-airline'
+	" Light-line
+	Plug 'itchyny/lightline.vim'
     
     " On the flight syntax check
     " Plug 'w0rp/ale'
@@ -44,10 +54,16 @@ call plug#begin('~/.vim/plugged')
 	" view css colors in code
 	Plug 'ap/vim-css-color'
 
+	" Commentary
+	" Use gcc to comment out a line (takes a count), gc to comment out the target of a motion (for example, gcap to comment out a paragraph),
+	Plug 'tpope/vim-commentary'
+
+	" Plug 'liuchengxu/vim-which-key'
+
 call plug#end()
 
 " let g:pymode_python = 'python3'
-let g:completor_python_binary = '$HOME/anaconda3/lib/python3.6/site-packages/jedi'
+" let g:completor_python_binary = '$HOME/anaconda3/lib/python3.6/site-packages/jedi'
 let g:completor_auto_trigger = 1
 
 source ~/.vim/settings.vim

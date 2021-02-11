@@ -1,7 +1,7 @@
 [distutils]
 index-servers=
-    pypi
-    testpypi
+pypi
+testpypi
 
 [testpypi]
 repository: https://upload.pypi.org/legacy/
