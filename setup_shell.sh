@@ -3,7 +3,11 @@ SHELL_NAME=zsh
 printf "\n** Checking that you are using the correct shell.. **.\n"
 if ! command -v $SHELL_NAME &> /dev/null;
 then
+	echo "  !!!WARNING !!!"
     echo "    $SHELL_NAME is not installed... Install it or suffer bash"
+	echo "    First setup the shell and try again"
+    echo "	 (you can directly run ./setup_shell.sh, no need to redo all"
+	exit 1
     #pip install "xonsh[full]"
 else
 	echo "    $SHELL_NAME detected"
@@ -22,7 +26,8 @@ then
 else
    if [ `uname` == 'Linux' ]; then
 	   echo "   # Current shell is not zsh, changing it. Please enter password."
-	   chsh -s ${SHELL_BIN_PATH} $whoami
+	   # chsh -s ${SHELL_BIN_PATH} $whoami
+	   chsh -s ${SHELL_BIN_PATH}
    elif [ `uname` == 'Darwin' ]; then
 	   echo "   # Current shell is not zsh, changing it. Please enter password."
 	   chsh -s ${SHELL_BIN_PATH}
