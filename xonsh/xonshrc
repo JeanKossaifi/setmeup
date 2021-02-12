@@ -1,0 +1,84 @@
+$PROMPT_REFRESH_INTERVAL = 1
+$UPDATE_COMPLETIONS_ON_KEYPRESS = True
+
+$PATH = ['/home/jkossaifi/anaconda3/bin'] + $PATH
+
+# OS dependent configuration
+config = {
+'Linux':{'PDF_READER':'evince'
+		},
+'Darwin':{'PDF_READER':'open'
+		}
+}
+
+# Set environment variables depending on OS
+OS = $(uname).strip()
+for key, value in config[OS].items():
+	${key} = value
+
+# True if connected over ssh, False otherwise...
+$CONNECTED_OVER_SSH = ('SSH_CLIENT' in ${...}) or ('SSH2_CLIENT' in ${...})
+
+$XONSH_SHOW_TRACEBACK = True
+
+# Make new terminal tabs start in the correct directory
+$PROMPT = '{vte_new_tab_cwd}' + $PROMPT
+
+
+#################################
+#  GPU Status display
+#################################
+
+# Return the utilization of the GPU
+from py3nvml.py3nvml import nvmlInit, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName, nvmlDeviceGetMemoryInfo, nvmlDeviceGetUtilizationRates
+ 
+nvmlInit()
+
+$NVIDIA_HANDLES = []
+n_device = nvmlDeviceGetCount() 
+for i in range(n_device):
+    handle = nvmlDeviceGetHandleByIndex(i)
+    $NVIDIA_HANDLES.append((i, nvmlDeviceGetName(handle), handle))
+
+import random
+def get_gpu_stats(gpu_threshold=0):
+	""" Returns the utilization of the GPU
+
+	Parameters
+	----------
+	gpu_threshold : int, default is 0
+		only display a GPU if it's utilization is higher than the threshold
+		set to 0 to always dispaly all the GPUs
+
+	Returns
+	-------
+	string of information
+	"""
+	infos = []
+	for idx, name, handle in $NVIDIA_HANDLES:
+		# info = nvmlDeviceGetMemoryInfo(handle)
+		# infos.append('[{} - {}/{}Gb]'.format(idx, (info.used >> 30), (info.total >> 30)))
+		utilization = nvmlDeviceGetUtilizationRates(handle)
+		if utilization.gpu >= gpu_threshold:
+			infos.append('[{} {: >3}%gpu {: >3}%mem]'.format(idx, utilization.gpu, utilization.memory))
+
+	if infos:
+		return '  '.join(infos) + str(random.randint(1,9))
+	else:
+		return None
+
+import datetime
+def get_date_time():
+	d = datetime.datetime.now();
+	return f'{d.day}/{d.month}/{d.year} {d.hour}:{d.minute}:{d.second}'
+
+$PROMPT_FIELDS['gpu_stats'] = get_gpu_stats
+$PROMPT_FIELDS['prompt_end'] = '>'
+$PROMPT_FIELDS['date_time'] = get_date_time
+
+# Original prompt
+# $PROMPT = '{env_name}{BOLD_GREEN}{user}@{hostname}{BOLD_BLUE} {cwd}{branch_color}{curr_branch: {}}{NO_COLOR} {BOLD_BLUE}{prompt_end}{NO_COLOR} '
+
+$PROMPT = '{env_name}{BOLD_GREEN}{user}@{hostname}{BOLD_BLUE} {cwd}{branch_color}{curr_branch: {}}{RESET} \n{localtime}{BOLD_BLUE}{prompt_end}{RESET} '
+# $RIGHT_PROMPT = '{localtime}'
+$BOTTOM_TOOLBAR	= '{BACKGROUND_BLACK}{gpu_stats:{}}'

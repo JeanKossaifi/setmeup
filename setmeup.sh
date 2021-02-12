@@ -68,6 +68,7 @@ rm $HOME/.zshrc
 rm $HOME/.vimrc
 rm $HOME/.gitconfig
 rm $HOME/.pypirc
+rm $HOME/.xonshrc
 rm -rf $HOME/.config/nvim/
 rm -rf $HOME/.vim
 rm -rf $HOME/.zsh
@@ -79,6 +80,7 @@ $CPY $PWD/zsh/zshrc $HOME/.zshrc
 $CPY $PWD/vim/vimrc $HOME/.vimrc
 $CPY $PWD/gitconfig $HOME/.gitconfig
 $CPY $PWD/zsh $HOME/.zsh
+$CPY $PWD/xonsh/xonshrc $HOME/.xonshrc
 
 # Add alias for scripts
 echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
