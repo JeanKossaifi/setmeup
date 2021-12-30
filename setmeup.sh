@@ -83,7 +83,7 @@ $CPY $PWD/zsh $HOME/.zsh
 $CPY $PWD/xonsh/xonshrc $HOME/.xonshrc
 
 # Add alias for scripts
-touch $HOME/local_zshrc
+touch $HOME/.local_zshrc
 # echo "alias mkpdf='$PWD/scripts/compile_latex.sh'" >> $HOME/.local_zshrc
 # echo "alias notebook='$PWD/scripts/notebook.sh'" >> $HOME/.local_zshrc
 # echo PATH=$HOME/anaconda3/bin:$PATH >> $HOME/.local_zshrc
