@@ -6,3 +6,4 @@ brew install --cask font-hack-nerd-font
 brew install neovim
 brew install zsh
 brew install font-computer-modern
+brew install node
